@@ -286,3 +286,20 @@ defmodule Domain.User.Gender do
 
   defp get_valid_values, do: @valid_values
 end
+
+defmodule Domain.User.Authentication do
+  # authentication fields
+
+  @type t :: %__MODULE__{
+          id: Domain.User.id_type(),
+          nickname: String.t(),
+          email: String.t(),
+          password: String.t() | charlist()
+        }
+  defstruct [:id, :nickname, :email, :password]
+end
+
+defmodule Domain.User.Repo do
+  @callback create(Domain.User.t(), Domain.User.Authentication.t()) ::
+            {:ok, Domain.User.t()} | {:error, any()}
+end
