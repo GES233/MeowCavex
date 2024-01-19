@@ -108,6 +108,13 @@ defmodule MeowCaveWeb do
   When used, dispatch to the appropriate controller/view/etc.
   """
   defmacro __using__(which) when is_atom(which) do
+    # 如果被这样调用：
+    # use MeowCaveWeb, :blabla
+    # 就等同于
+    # MeowCaveWeb.blabla()
+    # 但因为涉及到了 use 这个宏，就需要对语句进行 quote 处理。
+    #
+    # 所以如果不想局限于 MVC 架构的话，魔改可以有可能的，但只是可能。
     apply(__MODULE__, which, [])
   end
 end

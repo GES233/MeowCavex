@@ -11,6 +11,8 @@ defmodule MeowCaveWeb.Endpoint do
     same_site: "Lax"
   ]
 
+  # TODO: Add @token_options
+
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
@@ -23,8 +25,7 @@ defmodule MeowCaveWeb.Endpoint do
     gzip: false,
     only: MeowCaveWeb.static_paths()
 
-  # Code reloading can be explicitly enabled under the
-  # :code_reloader configuration of your endpoint.
+  # 代码重载将在你的端点配置的 :code_reloader 部分被明确的启用。
   if code_reloading? do
     socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
     plug Phoenix.LiveReloader
