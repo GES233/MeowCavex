@@ -1,11 +1,9 @@
 import Config
 
-# config/runtime.exs is executed for all environments, including
-# during releases. It is executed after compilation and before the
-# system starts, so it is typically used to load production configuration
-# and secrets from environment variables or elsewhere. Do not define
-# any compile-time configuration in here, as it won't be applied.
-# The block below contains prod specific runtime configuration.
+# config/runtime.exs 在所有环境都会运行，包括在发布时（during release）。
+# 它在编译后、系统启动前执行，因此通常用于从环境变量或其他地方加载生产配置和秘密。
+# 不要在这里定义任何编译时配置，因为它们不会被应用。
+# 以下代码块内的配置只在生产环境下运行。
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

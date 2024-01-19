@@ -5,6 +5,16 @@ defmodule Domain.Status do
       defmodule UseStatus
         use Status, [:a, :b, c: :default]
       end
+
+  除了拥有默认值为 `c` 的 Map ，`Status` 还拥有：
+
+  * `operate_when_not_match/1`
+  * `get_valid_values/0`
+  * `get_default_value/0`
+  * `value/1`
+  * `valid?/1`
+  * `under/2`
+  * `create/1`
   """
 
   @spec __using__(list()) :: {:__block__, [], [{any(), any(), any()}, ...]}
