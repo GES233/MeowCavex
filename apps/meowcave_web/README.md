@@ -16,3 +16,15 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
   * Docs: https://hexdocs.pm/phoenix
   * Forum: https://elixirforum.com/c/phoenix-forum
   * Source: https://github.com/phoenixframework/phoenix
+
+## 开发时注意的事情
+
+### 关于 Gettext
+
+参见 [Translations are dissapearing in umbrella #178 · elixir-gettext/gettext](https://github.com/elixir-gettext/gettext/issues/178) ~~（其实我也不知道怎么解决）~~，但是在 Umbrella 项目下确实不好处理。
+
+```bash
+cd ./apps/meowcave_web
+mix gettext.extract
+mix gettext.merge priv/gettext --locale zh_Hans
+```

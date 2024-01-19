@@ -1,13 +1,15 @@
-// See the Tailwind configuration guide for advanced usage
+// 为什么放这里？为什么？
+//
+// 查看更多的 Tailwind 配置教程可查看
 // https://tailwindcss.com/docs/configuration
 
 let plugin = require('tailwindcss/plugin')
 
 module.exports = {
   content: [
-    './js/**/*.js',
-    '../lib/*_web.ex',
-    '../lib/*_web/**/*.*ex'
+    '../apps/meowcave_web/assets/js/**/*.js',
+    '../apps/meowcave_web/lib/*_web.ex',
+    '../apps/meowcave_web/lib/*_web/**/*.*ex'
   ],
   theme: {
     extend: {},

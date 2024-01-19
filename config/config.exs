@@ -39,6 +39,12 @@ config :meowcave_web, MeowCaveWeb.Endpoint,
   pubsub_server: MeowCave.PubSub,
   live_view: [signing_salt: "eFbB+RKP"]
 
+# Locale
+# default: Chinese.
+config :meowcave_web, MeowCaveWeb.Gettext,
+  locales: ~w(en zh-Hans),
+  default_locale: "zh_Hans"
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
