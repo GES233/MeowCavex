@@ -1,0 +1,27 @@
+# Mix 将编译后的工具写入的目录。
+/_build/
+
+# 如果你运行 "mix test --cover"，覆盖相关的资源在此出现。
+/cover/
+
+# The directory Mix downloads your dependencies sources to.
+# 此目录下的 Mix 下载
+/deps/
+
+# 像是 ExDoc 的第三方依赖生成的文档。
+/doc/
+
+# 如果你想在本地编辑项目文件，请忽略 .fetch 文件。
+/.fetch
+
+# 如果虚拟机崩溃了，它会生成这个 dump ，让我们依旧忽视它。
+erl_crash.dump
+
+# 同时忽略通过 "mix archive.build "构建的存档工件。
+*.ez
+
+# 临时文件，像是来自测试的。
+/tmp/
+
+# 忽视经由 "mix hex.build" 建造的压缩包（tarball）。
+meowcave_app-*.tar
