@@ -1,4 +1,4 @@
-# MeowCave
+# MeowCavex(MeowCave using elixir)
 
 `MeowCave` （中文名为喵洞或是喵窝）是一个专为具有特定兴趣和爱好的同好们的社区而设计的网站。
 
