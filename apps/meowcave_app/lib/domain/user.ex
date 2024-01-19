@@ -77,7 +77,9 @@ defmodule Domain.User do
   end
 
   @spec remove_info(Domain.User.t(), atom()) :: Domain.User.t()
-  @doc false
+  @doc """
+  移除用户的信息。
+  """
   def remove_info(user, field) do
     {status, new_user, _info} = do_remove_info(user, field)
 
@@ -168,24 +170,24 @@ defmodule Domain.User.Gender do
 
   ## Inspect
 
-  @doc"""
+  @spec value(Domain.User.Gender.t()) :: atom()
+  @doc """
   返回当前的性别。
   """
-  @spec value(Domain.User.Gender.t()) :: atom()
-  def value(%__MODULE__{value: value} = gender) do
+  def value(%__MODULE__{value: value} = _gender) do
     value
   end
 
-  @doc"""
+  @spec valid?(Domain.User.Gender.t()) :: boolean()
+  @doc """
   返回当前的性别是否合法。
   """
-  @spec valid?(Domain.User.Gender.t()) :: boolean()
   def valid?(gender), do: value(gender) in get_valid_values()
 
-  @doc"""
+  @spec under(Domain.User.Gender.t(), atom() | list()) :: boolean()
+  @doc """
   当前的性别是否是所输入的状态？
   """
-  @spec under(Domain.User.Gender.t(), atom() | list()) :: boolean()
   def under(gender, state) when is_atom(state) do
     state in get_valid_values() and value(gender) == state
   end
@@ -197,32 +199,32 @@ defmodule Domain.User.Gender do
   def under(_gender, _state), do: nil
   # TODO: raise exception: invalid.
 
-  @doc"""
+  @spec hasgender?(any()) :: boolean()
+  @doc """
   当前的性别是否为空？（会跳过用户设置的隐藏属性）
   """
-  @spec hasgender?(any()) :: boolean()
   def hasgender?(gender), do: not under(gender, :blank)
 
-  @doc"""
+  @spec bisexual?(Domain.User.Gender.t()) :: boolean()
+  @doc """
   当前的性别是否在二元性别体系内？
   """
-  @spec bisexual?(Domain.User.Gender.t()) :: boolean()
   def bisexual?(gender), do: under(gender, [:male, :female]) and not secret?(gender)
 
-  @doc"""
+  @spec secret?(Domain.User.Gender.t()) :: boolean()
+  @doc """
   当前的性别是否是私密的？
   """
-  @spec secret?(Domain.User.Gender.t()) :: boolean()
   def secret?(gender) do
     %{hidden: hide?} = gender
 
     hide?
   end
 
-  @doc"""
+  @spec get(Domain.User.Gender.t()) :: atom()
+  @doc """
   应用层面的返回性别（和 `Domain.User.Gender.value/1` 的区别是会被隐藏）
   """
-  @spec get(Domain.User.Gender.t()) :: atom()
   def get(gender) do
     case secret?(gender) do
       true -> :blank
@@ -232,28 +234,28 @@ defmodule Domain.User.Gender do
 
   ## Operate
 
-  @doc"""
+  @spec create() :: Domain.User.Gender.t()
+  @doc """
   创建空白的性别
   """
-  @spec create() :: Domain.User.Gender.t()
   def create(), do: %__MODULE__{}
 
-  @doc"""
+  @spec hide(Domain.User.Gender.t()) :: Domain.User.Gender.t()
+  @doc """
   隐藏性别
   """
-  @spec hide(Domain.User.Gender.t()) :: Domain.User.Gender.t()
   def hide(gender), do: %__MODULE__{gender | hidden: true}
 
-  @doc"""
+  @spec expose(Domain.User.Gender.t()) :: Domain.User.Gender.t()
+  @doc """
   暴露性别
   """
-  @spec expose(Domain.User.Gender.t()) :: Domain.User.Gender.t()
   def expose(gender), do: %__MODULE__{gender | hidden: false}
 
+  @spec give(Domain.User.Gender.t(), atom()) :: Domain.User.Gender.t()
   @doc """
   当性别为 `blank` 时给予性别。
   """
-  @spec give(Domain.User.Gender.t(), atom()) :: Domain.User.Gender.t()
   def give(gender, new_gender) do
     if not hasgender?(gender) do
       update(gender, new_gender)
@@ -262,10 +264,10 @@ defmodule Domain.User.Gender do
     end
   end
 
-  @doc"""
+  @spec update(Domain.User.Gender.t(), atom()) :: Domain.User.Gender.t()
+  @doc """
   将性别更新到某值（更新成功的前提是新的性别是合法的）
   """
-  @spec update(Domain.User.Gender.t(), atom()) :: Domain.User.Gender.t()
   def update(gender, new_gender) do
     gender_with_status = do_update(gender, new_gender)
 
