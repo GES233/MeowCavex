@@ -678,20 +678,20 @@ defmodule MeowCaveWeb.CoreComponents do
   但是与之不同的是考虑到了不同的【场景】：
 
   * 只显示网站标题或网站名
-  * 标题作为内容
-  * 标题作为角色
+  * 标题作为内容（MeowCave - 啊吧啊吧啊吧吧）
+  * 标题作为角色（注册 :: MeowCave）
 
   ## Examples
 
   ```heex
-  <.naive_title>
-    <%= assigns[:page_title] || assigns[:page_role] %>
+  <.naive_title app_name="MeowCave" scenario={check_title(assigns)}>
+    <%= assigns[:page_title] || assigns[:page_role] || "MeowCave" %>
   </.naive_title>
   ```
   """
   @doc type: :component
   attr :app_name, :string, required: true
-  attr :scenario, :atom
+  attr :scenario, :atom, doc: "Use scenario={check_title(assigns)}"
 
   slot :inner_block, required: true, doc: "Content rendered inside the `title` tag."
 
