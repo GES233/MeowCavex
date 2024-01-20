@@ -671,4 +671,57 @@ defmodule MeowCaveWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  @doc """
+  对 Phoenix.LiveView.Component.live_title/1 的替换。
+
+  但是与之不同的是考虑到了不同的【场景】：
+
+  * 只显示网站标题或网站名
+  * 标题作为内容
+  * 标题作为角色
+
+  ## Examples
+
+  ```heex
+  <.naive_title>
+    <%= assigns[:page_title] || assigns[:page_role] %>
+  </.naive_title>
+  ```
+  """
+  @doc type: :component
+  attr :app_name, :string, required: true
+  attr :scenario, :atom
+
+  slot :inner_block, required: true, doc: "Content rendered inside the `title` tag."
+
+  def naive_title(assigns) do
+    assigns =
+      assign(assigns, prefix: assigns[:app_name] <> " - ", suffix: " :: " <> assigns[:app_name])
+
+    case assigns[:scenario] do
+      :content ->
+        ~H"""
+        <title><%= @prefix %><%= render_slot(@inner_block) %></title>
+        """
+
+      :role ->
+        ~H"""
+        <title><%= render_slot(@inner_block) %><%= @suffix %></title>
+        """
+
+      _ ->
+        ~H"""
+        <title><%= render_slot(@inner_block) %></title>
+        """
+    end
+  end
+
+  def check_title(assigns) do
+    cond do
+      assigns[:page_title] -> :content
+      assigns[:page_role] -> :role
+      true -> nil
+    end
+  end
 end
