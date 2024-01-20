@@ -21,21 +21,21 @@ defmodule MemberTest do
 
     # Update when map.
     user =
-      Domain.update(user_model, :nickname, "QgmrTheGigitty")
-      |> Domain.update(
+      User.update(user_model, :nickname, "QgmrTheGigitty")
+      |> User.update(
         :gender,
         Gender.create()
         |> Gender.give(:male)
       )
-      |> Domain.update(:info, "fxxk off, Brain.")
+      |> User.update(:info, "fxxk off, Brain.")
 
     assert user.nickname == "QgmrTheGigitty"
     assert Gender.get(user.gender) == :male
     assert user.info == "fxxk off, Brain."
 
     no_public_gender_user =
-      Domain.remove_info(user, :gender)
-      |> Domain.remove_info(:info)
+      User.remove_info(user, :gender)
+      |> User.remove_info(:info)
 
     assert Gender.secret?(no_public_gender_user.gender)
     assert no_public_gender_user.info == ""
