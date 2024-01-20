@@ -1,4 +1,4 @@
-defmodule MeowCave.Repo.User do
+defmodule MeowCave.Repo.Member do
   @moduledoc """
   俺也不知道咋写。
   """
@@ -8,7 +8,7 @@ defmodule MeowCave.Repo.User do
   alias Ecto.Enum
 
   schema "users" do
-    # from Domain.User
+    # from Member.User
     field :username, :string
     field :nickname, :string
     field :status, Enum, values: [:normal, :deleted, :freeze, :blocked, :newbie]
@@ -16,10 +16,10 @@ defmodule MeowCave.Repo.User do
     field :gender_visible, :boolean
     field :info, :string
     field :join_at, :utc_datetime
-    # from Domain.User.Authentication
+    # from Member.User.Authentication
     field :email, :string
     field :password, :binary
-    # from Domain.User.Locale
+    # from Member.User.Locale
     field :timezone, :string
     field :lang, :string
 
@@ -35,7 +35,7 @@ defmodule MeowCave.Repo.User do
     name = get_field(changeset, :nickname)
 
     if is_nil(name) do
-      put_change(changeset, :nickname, "Anomynous User")
+      put_change(changeset, :nickname, "Anomynous Member")
     end
   end
 end

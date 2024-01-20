@@ -1,10 +1,10 @@
-defmodule UserTest do
+defmodule MemberTest do
   use ExUnit.Case
-  # doctest Domain.User
+  # doctest Member.User
 
-  alias Domain.User
-  alias Domain.User.{Status, Gender, Authentication, Locale}
-  alias Service.User.Register
+  alias Member.User
+  alias Member.User.{Gender, Status, Authentication, Locale}
+  alias Member.Service.Register
 
   test "create user" do
     user_model =
@@ -21,21 +21,21 @@ defmodule UserTest do
 
     # Update when map.
     user =
-      User.update(user_model, :nickname, "QgmrTheGigitty")
-      |> User.update(
+      Domain.update(user_model, :nickname, "QgmrTheGigitty")
+      |> Domain.update(
         :gender,
         Gender.create()
         |> Gender.give(:male)
       )
-      |> User.update(:info, "fxxk off, Brain.")
+      |> Domain.update(:info, "fxxk off, Brain.")
 
     assert user.nickname == "QgmrTheGigitty"
     assert Gender.get(user.gender) == :male
     assert user.info == "fxxk off, Brain."
 
     no_public_gender_user =
-      User.remove_info(user, :gender)
-      |> User.remove_info(:info)
+      Domain.remove_info(user, :gender)
+      |> Domain.remove_info(:info)
 
     assert Gender.secret?(no_public_gender_user.gender)
     assert no_public_gender_user.info == ""

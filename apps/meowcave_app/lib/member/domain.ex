@@ -1,6 +1,6 @@
-defmodule Domain.User do
+defmodule Member.User do
   @moduledoc """
-  领域模型 `User` 是负责与应用内其他主体互动的主要对象。
+  领域模型 `Member.User` 是负责与应用内其他主体互动的主要对象。
 
   下面简单的介绍用户的各键：
 
@@ -8,12 +8,13 @@ defmodule Domain.User do
   * `username` 唯一的用户名，仅允许 ASCII 字符，主要用作在应用层的标识（可以参考推特）
   * `nickname` 用户的昵称，可以由用户自主选择
   * `gender` 用户的性别（可由用户隐藏），目前选择二元性别分类（M/F），暂不考虑 LGBTQ+ 以及复杂的多元性别机制
-  * `status` 用户的状态，详见 `Domain.User.Status`
+  * `status` 用户的状态，详见 `Member.User.Status`
   * `info` 用户所填写的信息
   * `join_at` 用户加入的时间，默认选择 `DateTime`
   """
 
-  alias Domain.User.{Gender, Status}
+  import Status
+  alias Member.User.{Gender}
 
   @type id_type :: integer()
 
@@ -39,7 +40,7 @@ defmodule Domain.User do
     :join_at
   ]
 
-  @spec update(Domain.User.t(), atom(), any()) :: Domain.User.t()
+  @spec update(Member.User.t(), atom(), any()) :: Member.User.t()
   @doc """
   更新用户的数据。
   """
@@ -75,7 +76,7 @@ defmodule Domain.User do
     end
   end
 
-  @spec remove_info(Domain.User.t(), atom()) :: Domain.User.t()
+  @spec remove_info(Member.User.t(), atom()) :: Member.User.t()
   @doc """
   移除用户的信息。
   """
@@ -101,26 +102,26 @@ defmodule Domain.User do
   end
 end
 
-defmodule Domain.User.Status do
-  use Domain.Status, [:normal, :deleted, :freeze, :blocked, newbie: :default]
+defmodule Member.User.Status do
+  use Status, [:normal, :deleted, :freeze, :blocked, newbie: :default]
 
   ## Inspect status
 
-  @spec normal?(Domain.User.Status.t()) :: boolean() | nil
+  @spec normal?(Member.User.Status.t()) :: boolean() | nil
   def normal?(status), do: under(status, :normal)
 
-  @spec blocked?(Domain.User.Status.t()) :: boolean() | nil
+  @spec blocked?(Member.User.Status.t()) :: boolean() | nil
   def blocked?(status), do: under(status, :blocked)
 
-  @spec visible?(Domain.User.Status.t()) :: boolean() | nil
+  @spec visible?(Member.User.Status.t()) :: boolean() | nil
   def visible?(status), do: under(status, [:normal, :freeze, :blocked])
 
-  @spec interactive?(Domain.User.Status.t()) :: boolean() | nil
+  @spec interactive?(Member.User.Status.t()) :: boolean() | nil
   def interactive?(status), do: under(status, [:normal, :freeze])
 
   ## Operate
 
-  @spec activate(Domain.User.Status.t()) :: Domain.User.Status.t()
+  @spec activate(Member.User.Status.t()) :: Member.User.Status.t()
   def activate(status) do
     case value(status) do
       :newbie -> %__MODULE__{value: :normal}
@@ -129,7 +130,7 @@ defmodule Domain.User.Status do
     end
   end
 
-  @spec delete(Domain.User.Status.t()) :: Domain.User.Status.t()
+  @spec delete(Member.User.Status.t()) :: Member.User.Status.t()
   def delete(status) do
     case value(status) do
       :deleted -> operate_when_not_match(status)
@@ -137,7 +138,7 @@ defmodule Domain.User.Status do
     end
   end
 
-  @spec freeze(Domain.User.Status.t()) :: Domain.User.Status.t()
+  @spec freeze(Member.User.Status.t()) :: Member.User.Status.t()
   def freeze(status) do
     case value(status) do
       :normal -> %__MODULE__{value: :freeze}
@@ -145,7 +146,7 @@ defmodule Domain.User.Status do
     end
   end
 
-  @spec block(any()) :: Domain.User.Status.t()
+  @spec block(any()) :: Member.User.Status.t()
   def block(status) do
     case status do
       :deleted -> operate_when_not_match(status)
@@ -154,7 +155,7 @@ defmodule Domain.User.Status do
   end
 end
 
-defmodule Domain.User.Gender do
+defmodule Member.User.Gender do
   @moduledoc """
   性别属于用户的属性之一，其包含两个属性：
 
@@ -169,7 +170,7 @@ defmodule Domain.User.Gender do
 
   ## Inspect
 
-  @spec value(Domain.User.Gender.t()) :: atom()
+  @spec value(Member.User.Gender.t()) :: atom()
   @doc """
   返回当前的性别。
   """
@@ -177,13 +178,13 @@ defmodule Domain.User.Gender do
     value
   end
 
-  @spec valid?(Domain.User.Gender.t()) :: boolean()
+  @spec valid?(Member.User.Gender.t()) :: boolean()
   @doc """
   返回当前的性别是否合法。
   """
   def valid?(gender), do: value(gender) in get_valid_values()
 
-  @spec under(Domain.User.Gender.t(), atom() | list()) :: boolean()
+  @spec under(Member.User.Gender.t(), atom() | list()) :: boolean()
   @doc """
   当前的性别是否是所输入的状态？
   """
@@ -204,13 +205,13 @@ defmodule Domain.User.Gender do
   """
   def hasgender?(gender), do: not under(gender, :blank)
 
-  @spec bisexual?(Domain.User.Gender.t()) :: boolean()
+  @spec bisexual?(Member.User.Gender.t()) :: boolean()
   @doc """
   当前的性别是否在二元性别体系内？
   """
   def bisexual?(gender), do: under(gender, [:male, :female]) and not secret?(gender)
 
-  @spec secret?(Domain.User.Gender.t()) :: boolean()
+  @spec secret?(Member.User.Gender.t()) :: boolean()
   @doc """
   当前的性别是否是私密的？
   """
@@ -220,9 +221,9 @@ defmodule Domain.User.Gender do
     hide?
   end
 
-  @spec get(Domain.User.Gender.t()) :: atom()
+  @spec get(Member.User.Gender.t()) :: atom()
   @doc """
-  应用层面的返回性别（和 `Domain.User.Gender.value/1` 的区别是会被隐藏）
+  应用层面的返回性别（和 `Member.User.Gender.value/1` 的区别是会被隐藏）
   """
   def get(gender) do
     case secret?(gender) do
@@ -233,25 +234,25 @@ defmodule Domain.User.Gender do
 
   ## Operate
 
-  @spec create() :: Domain.User.Gender.t()
+  @spec create() :: Member.User.Gender.t()
   @doc """
   创建空白的性别
   """
   def create(), do: %__MODULE__{}
 
-  @spec hide(Domain.User.Gender.t()) :: Domain.User.Gender.t()
+  @spec hide(Member.User.Gender.t()) :: Member.User.Gender.t()
   @doc """
   隐藏性别
   """
   def hide(gender), do: %__MODULE__{gender | hidden: true}
 
-  @spec expose(Domain.User.Gender.t()) :: Domain.User.Gender.t()
+  @spec expose(Member.User.Gender.t()) :: Member.User.Gender.t()
   @doc """
   暴露性别
   """
   def expose(gender), do: %__MODULE__{gender | hidden: false}
 
-  @spec give(Domain.User.Gender.t(), atom()) :: Domain.User.Gender.t()
+  @spec give(Member.User.Gender.t(), atom()) :: Member.User.Gender.t()
   @doc """
   当性别为 `blank` 时给予性别。
   """
@@ -263,7 +264,7 @@ defmodule Domain.User.Gender do
     end
   end
 
-  @spec update(Domain.User.Gender.t(), atom()) :: Domain.User.Gender.t()
+  @spec update(Member.User.Gender.t(), atom()) :: Member.User.Gender.t()
   @doc """
   将性别更新到某值（更新成功的前提是新的性别是合法的）
   """
@@ -286,7 +287,7 @@ defmodule Domain.User.Gender do
   defp get_valid_values, do: @valid_values
 end
 
-defmodule Domain.User.Locale do
+defmodule Member.User.Locale do
   @moduledoc """
   关于用户的定位（目前包括语言偏好和市区）。
 
@@ -294,18 +295,18 @@ defmodule Domain.User.Locale do
   但是用户的时区可能需要（就如果所谓 IP 属地一样），因此后者会持久化。
   """
   @type t :: %__MODULE__{
-          id: Domain.User.id_type(),
+          id: Member.User.id_type(),
           lang: charlist(),
           timezone: charlist()
         }
   defstruct [:id, :lang, :timezone]
 end
 
-defmodule Domain.User.Authentication do
+defmodule Member.User.Authentication do
   # authentication fields
 
   @type t :: %__MODULE__{
-          id: Domain.User.id_type(),
+          id: Member.User.id_type(),
           nickname: String.t(),
           email: String.t(),
           password: String.t() | charlist()
@@ -316,7 +317,7 @@ defmodule Domain.User.Authentication do
   def has_id?(%__MODULE__{} = authn), do: authn.id != nil
 end
 
-defmodule Domain.User.Repo do
-  @callback create(Domain.User.t(), Domain.User.Authentication.t(), Domain.User.Locale.t()) ::
-              {:ok, Domain.User.t()} | {:error, any()}
+defmodule Member.User.Repo do
+  @callback create(Member.User.t(), Member.User.Authentication.t(), Member.User.Locale.t()) ::
+              {:ok, Member.User.t()} | {:error, any()}
 end
