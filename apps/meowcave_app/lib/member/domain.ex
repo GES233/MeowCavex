@@ -321,3 +321,15 @@ defmodule Member.User.Repo do
   @callback create(Member.User.t(), Member.User.Authentication.t(), Member.User.Locale.t()) ::
               {:ok, Member.User.t()} | {:error, any()}
 end
+
+defmodule Member.Invite do
+  @moduledoc """
+  关于成员间的邀请关系，其将在很多场合被使用（
+  例如邀请注册、惩罚的连坐、无法使用邮件的情况下的密码验证）。
+  """
+
+  @type t :: %__MODULE__{
+    user_id: Member.User.id_type()
+  }
+  defstruct [:user_id]
+end
