@@ -1,6 +1,6 @@
 defmodule Domain.User do
   @moduledoc """
-  领域模型`用户`是负责与应用内其他主体互动的主要对象。
+  领域模型 `User` 是负责与应用内其他主体互动的主要对象。
 
   下面简单的介绍用户的各键：
 
@@ -9,7 +9,6 @@ defmodule Domain.User do
   * `nickname` 用户的昵称，可以由用户自主选择
   * `gender` 用户的性别（可由用户隐藏），目前选择二元性别分类（M/F），暂不考虑 LGBTQ+ 以及复杂的多元性别机制
   * `status` 用户的状态，详见 `Domain.User.Status`
-  * `timezone` 用户所在地的市区，主要用于展示层时间的变化以及用户的行为的时间的记录
   * `info` 用户所填写的信息
   * `join_at` 用户加入的时间，默认选择 `DateTime`
   """
@@ -25,7 +24,7 @@ defmodule Domain.User do
           gender: Gender.t(),
           status: Status.t(),
           # Use value when DTO.
-          timezone: charlist(),
+          # timezone: charlist(),
           info: String.t(),
           join_at: DateTime.t()
         }
@@ -35,7 +34,7 @@ defmodule Domain.User do
     :nickname,
     :gender,
     :status,
-    :timezone,
+    # :timezone,
     :info,
     :join_at
   ]
@@ -285,6 +284,21 @@ defmodule Domain.User.Gender do
   end
 
   defp get_valid_values, do: @valid_values
+end
+
+defmodule Domain.User.Locale do
+  @moduledoc """
+  关于用户的定位（目前包括语言偏好和市区）。
+
+  其中用户使用的语言可以与业务无关（虽然代码会写英文但是默认是简体中文），
+  但是用户的时区可能需要（就如果所谓 IP 属地一样），因此后者会持久化。
+  """
+  @type t :: %__MODULE__{
+    id: Domain.User.id_type(),
+    lang: charlist(),
+    timezone: charlist()
+  }
+  defstruct [:id, :lang, :timezone]
 end
 
 defmodule Domain.User.Authentication do

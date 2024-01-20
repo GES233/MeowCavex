@@ -10,8 +10,10 @@ defmodule Service.User.Register do
   """
 
   alias Domain.User
-  alias Domain.User.{Gender, Status}
+  alias Domain.User.{Gender, Status, Locale}
   alias Domain.User.Authentication, as: UserAuth
+
+  # DTO2VO
 
   @spec create_auth(maybe_improper_list() | map()) :: Domain.User.Authentication.t()
   def create_auth(fields), do: create_auth(fields[:nickname], fields[:email], fields[:password])
@@ -22,8 +24,12 @@ defmodule Service.User.Register do
     %UserAuth{id: nil, nickname: nickname, email: email, password: password}
   end
 
-  @spec create_blank_user(Domain.User.Authentication.t()) :: Domain.User.t()
-  def create_blank_user(%UserAuth{nickname: nickname} = _userauth, timezone \\ "Etc/UTC") do
+  def create_locale(), do: %Locale{}
+
+  # VO2Entity
+
+  @spec create_blank_user(Domain.User.Authentication.t(), Domain.User.Locale.t()) :: Domain.User.t()
+  def create_blank_user(%UserAuth{nickname: nickname} = _userauth, %Locale{} = _locale) do
     # 时区信息应该来自 DTO 。
 
     current = DateTime.utc_now()
@@ -35,10 +41,17 @@ defmodule Service.User.Register do
       gender: Gender.create(),
       status: Status.create(),
       info: "",
-      timezone: timezone,
       join_at: current
     }
   end
 
   # TODO: Conn with repo.
+end
+
+defmodule Service.User.UpdateLocale do
+  @moduledoc """
+  更新用户地区相关。
+  """
+
+  # 话说 Elixir 怎么实现类似于依赖注入的东西啊，难道只能通过 callback 或配置吗？
 end
