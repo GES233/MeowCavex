@@ -55,6 +55,19 @@ defmodule Member.Service.Register do
   end
 
   # TODO: Conn with repo.
+
+  ## Exceptions
+
+  defmodule EmailCollide do
+    defexception [:message]
+
+    @impl true
+    def exception(collide_email) do
+      msg = "#{inspect(collide_email)}"
+
+      %EmailCollide{message: msg}
+    end
+  end
 end
 
 defmodule Member.Service.UpdateLocale do

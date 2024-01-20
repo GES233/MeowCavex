@@ -10,6 +10,9 @@ defmodule Member.Usecase.Register do
 
       Member.Usecase.Register.call(..., repo: MeowCave.Member)
 
+  可能被抛出的错误：
+
+  * `Member.Service.EmailCollide` 邮件已经有用户注册了
   """
   alias Member.Service.Register
 
@@ -28,10 +31,16 @@ defmodule Member.Usecase.Register do
 
     {repo, _opts} = Keyword.pop(opts, :repo, @default_repo)
 
-    {:ok, user} = repo.create(auth_field, locale_field)
-    # TODO: Add error handler.
+    {status, user_or_changeset} = repo.create(auth_field, locale_field)
 
-    user
+    case status do
+      :ok -> user_or_changeset
+      :error
+      -> case user_or_changeset do
+        # TODO: 仔细看下 Ecto.insert 的错误格式
+        _ -> raise Register.EmailCollide, auth_field.email
+      end
+    end
   end
 end
 

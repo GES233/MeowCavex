@@ -15,6 +15,7 @@ defmodule Member.User do
 
   import Status
   alias Member.User.{Gender}
+  alias Member.User.FieldInvalidError
 
   @type id_type :: integer()
 
@@ -45,11 +46,15 @@ defmodule Member.User do
   更新用户的数据。
   """
   def update!(user, field, content) do
-    {status, new_user, _info} = update(user, field, content)
+    {status, new_user, info} = update(user, field, content)
 
     case status do
       :ok -> new_user
-      _ -> user
+      _ -> case info do
+        :field_invalid -> raise FieldInvalidError, field
+        _ -> raise "Reserved error with unknown error info #{inspect(info)}"
+        # Reserved
+      end
     end
   end
 
@@ -81,13 +86,16 @@ defmodule Member.User do
   移除用户的信息。
   """
   def remove_info!(user, field) do
-    {status, new_user, _info} = remove_info(user, field)
+    {status, new_user, info} = remove_info(user, field)
 
     case status do
       :ok -> new_user
-      _ -> user
+      _ -> case info do
+        :field_invalid -> raise FieldInvalidError, field
+        _ -> raise "Reserved error with unknown error info #{inspect(info)}"
+        # Reserved
+      end
     end
-    # TODO: Add more error handling
   end
 
   def remove_info(user, field) do
@@ -99,6 +107,17 @@ defmodule Member.User do
       :timezone -> update(user, :timezone, "")
       # [:id, :username, :status, :join_at] -> user
       _ -> {:error, user, :field_invalid}
+    end
+  end
+
+  defmodule FieldInvalidError do
+    defexception [:message]
+
+    @impl true
+    def exception(invalid_field) do
+      msg = "The field you attempt to contrive or write(#{inspect(invalid_field)}) is invalid."
+
+      %FieldInvalidError{message: msg}
     end
   end
 end
@@ -163,6 +182,7 @@ defmodule Member.User.Gender do
   * `value` 性别本身（原子值，目前包括 `:male`、`:female`、`:non_bisexual`、`:blank`）
   * `hidden` 是否不显示性别，布尔值
   """
+  alias Member.User.Gender.GenderTooDiverseException
 
   @type value :: atom()
   @valid_values [:male, :female, :non_bisexual, :blank]
@@ -274,9 +294,8 @@ defmodule Member.User.Gender do
 
     case status do
       :ok -> gender_or_error
-      :error -> gender
+      :error -> raise GenderTooDiverseException, gender
     end
-    # 大家看着这里可能好奇，我这样子写有卵用吗？
   end
 
   @spec update(Member.User.Gender.t(), atom()) :: {:ok, Member.User.Gender.t()}
@@ -291,6 +310,21 @@ defmodule Member.User.Gender do
   end
 
   defp get_valid_values, do: @valid_values
+
+  defmodule GenderTooDiverseException do
+    @moduledoc """
+    如其名，太过多元的性别（包括但不限于武装直升机）。
+    """
+    defexception [:message]
+
+    @impl true
+    def exception(new_gender) do
+      msg =
+        "The genders you entered(#{inspect(new_gender)}) are so diverse that sites can't correspond."
+
+      %GenderTooDiverseException{message: msg}
+    end
+  end
 end
 
 defmodule Member.User.Locale do
@@ -315,6 +349,7 @@ defmodule Member.User.Authentication do
   * 需要确定你是你的（注册、登录等）
   * 涉及到你对你的确认的（密码重置啥的）
   """
+
   # authentication fields
 
   @type t :: %__MODULE__{
@@ -347,7 +382,7 @@ defmodule Member.Invite do
   """
 
   @type t :: %__MODULE__{
-    user_id: Member.User.id_type()
-  }
+          user_id: Member.User.id_type()
+        }
   defstruct [:user_id]
 end
