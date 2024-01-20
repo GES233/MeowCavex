@@ -325,8 +325,13 @@ defmodule Member.User.Authentication do
 end
 
 defmodule Member.User.Repo do
+  @doc """
+  按照给定的领域对象向仓库添加用户。
+  """
   @callback create(Member.User.Authentication.t(), Member.User.Locale.t()) ::
               {:ok, Member.User.t()} | {:error, any()}
+
+  # @callback update_user_info(Member.User.t()) :: Member.User.t()
 end
 
 defmodule Member.Invite do

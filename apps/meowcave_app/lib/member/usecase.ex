@@ -28,7 +28,10 @@ defmodule Member.Usecase.Register do
 
     {repo, _opts} = Keyword.pop(opts, :repo, @default_repo)
 
-    repo.create(auth_field, locale_field)
+    {:ok, user} = repo.create(auth_field, locale_field)
+    # TODO: Add error handler.
+
+    user
   end
 end
 

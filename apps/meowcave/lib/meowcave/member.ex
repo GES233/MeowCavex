@@ -10,8 +10,12 @@ defmodule MeowCave.Member do
 
   @impl true
   def create(%User.Authentication{} = authentication_field, %User.Locale{} = locale_field) do
-    UserRepo.from_domain(authentication_field, locale_field)
-    |> Repo.insert!()
-    |> UserRepo.to_domain()
+    {status, user_or_changeset} = UserRepo.from_domain(authentication_field, locale_field)
+    |> Repo.insert()
+
+    case status do
+      :ok -> {:ok, user_or_changeset |> UserRepo.to_domain()}
+      :error -> {:error, user_or_changeset}
+    end
   end
 end
