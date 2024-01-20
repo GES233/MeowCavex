@@ -11,7 +11,7 @@ defmodule MeowCave.Member do
   @impl true
   def create(%User.Authentication{} = authentication_field, %User.Locale{} = locale_field) do
     UserRepo.from_domain(authentication_field, locale_field)
-      |> Repo.insert!()
-      |> UserRepo.to_domain()
+    |> Repo.insert!()
+    |> UserRepo.to_domain()
   end
 end

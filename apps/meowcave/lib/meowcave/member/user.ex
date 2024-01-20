@@ -15,12 +15,12 @@ defmodule MeowCave.Member.UserRepo do
     field :nickname, :string
     field :status, Enum, values: [:normal, :deleted, :freeze, :blocked, :newbie]
     field :gender, Enum, values: [:male, :female, :non_bisexual, :blank]
-    field :gender_visible, :boolean
+    field :gender_visible, :boolean, default: false
     field :info, :string
     field :join_at, :utc_datetime
     # from Member.User.Authentication
     field :email, :string
-    field :password, :binary
+    field :password, :string, redact: true
     # from Member.User.Locale
     field :timezone, :string
     field :lang, :string
@@ -30,8 +30,21 @@ defmodule MeowCave.Member.UserRepo do
 
   ## Changeset
 
-  def changeset(user, _attrs) do
+  def changeset(user, attrs) do
     user
+    |> cast(attrs, [
+      :username,
+      :nickname,
+      :status,
+      :gender,
+      :gender_visible,
+      :info,
+      :join_at,
+      :email,
+      :password,
+      :timezone,
+      :lang
+    ])
     |> set_anomynous_nickname()
   end
 
@@ -49,14 +62,14 @@ defmodule MeowCave.Member.UserRepo do
     %__MODULE__{
       username: nil,
       nickname: auth_field.nickname,
-      status: User.Status.create() |> User.Status.value() |> Atom.to_string(),
-      gender: User.Gender.create() |> User.Gender.value() |> Atom.to_string(),
+      status: User.Status.create() |> User.Status.value(),
+      gender: User.Gender.create() |> User.Gender.value(),
       gender_visible: not (User.Gender.create() |> User.Gender.secret?()),
-      join_at: DateTime.utc_now(),
+      join_at: DateTime.utc_now(:second),
       email: auth_field.email,
       password: auth_field.hashed_password,
       timezone: locale.timezone,
-      lang: locale.lang,
+      lang: locale.lang
     }
   end
 
@@ -66,11 +79,11 @@ defmodule MeowCave.Member.UserRepo do
       username: dao.username,
       nickname: dao.nickname,
       gender: %User.Gender{
-        value: dao.gender |> String.to_atom,
-        hidden: not(dao.gender_visible)
+        value: dao.gender,
+        hidden: not dao.gender_visible
       },
       status: %User.Status{
-        value: dao.status |> String.to_atom
+        value: dao.status
       },
       info: dao.info,
       join_at: dao.join_at
