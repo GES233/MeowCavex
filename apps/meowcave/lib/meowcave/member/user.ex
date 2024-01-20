@@ -28,6 +28,8 @@ defmodule MeowCave.Member.UserRepo do
     timestamps()
   end
 
+  ## Changeset
+
   def changeset(user, _attrs) do
     user
     |> set_anomynous_nickname()
@@ -41,6 +43,8 @@ defmodule MeowCave.Member.UserRepo do
     end
   end
 
+  ## Application related.
+
   def from_domain(%User.Authentication{} = auth_field, %User.Locale{} = locale) do
     %__MODULE__{
       username: nil,
@@ -50,7 +54,7 @@ defmodule MeowCave.Member.UserRepo do
       gender_visible: not (User.Gender.create() |> User.Gender.secret?()),
       join_at: DateTime.utc_now(),
       email: auth_field.email,
-      password: auth_field.password,
+      password: auth_field.hashed_password,
       timezone: locale.timezone,
       lang: locale.lang,
     }
@@ -72,11 +76,16 @@ defmodule MeowCave.Member.UserRepo do
       join_at: dao.join_at
     }
   end
+end
 
-  def to_locale_fields{%__MODULE__{} = dao} do
-    %User.Locale{
-      lang: dao.lang,
-      timezone: dao.timezone
-    }
+defmodule MeowCave.Member.User.PassHash do
+  @behaviour Member.Service.Password
+
+  def generate_hash(password) do
+    Pbkdf2.hash_pwd_salt(password)
+  end
+
+  def verify_pswd(password, hash) do
+    Pbkdf2.verify_pass(password, hash)
   end
 end

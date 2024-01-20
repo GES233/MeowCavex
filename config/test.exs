@@ -30,3 +30,6 @@ config :swoosh, :api_client, false
 
 # 为加快测试环境下的编译，在运行时初始化 plug
 config :phoenix, :plug_init_mode, :runtime
+
+# 测试环境不用那么多次的加密
+config :pbkdf2_elixir, :rounds, 1

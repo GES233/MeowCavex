@@ -4,6 +4,11 @@ defmodule Member.Service do
   """
 end
 
+defmodule Member.Service.Password do
+  @callback generate_hash(String.t()) :: charlist()
+  @callback verify_pswd(String.t(), charlist()) :: boolean()
+end
+
 defmodule Member.Service.Register do
   @moduledoc """
   注册服务。

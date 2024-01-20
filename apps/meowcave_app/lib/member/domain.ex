@@ -303,16 +303,23 @@ defmodule Member.User.Locale do
 end
 
 defmodule Member.User.Authentication do
+  @moduledoc """
+  说白了就两个使用场景：
+
+  * 需要确定你是你的（注册、登录等）
+  * 涉及到你对你的确认的（密码重置啥的）
+  """
   # authentication fields
 
   @type t :: %__MODULE__{
           id: Member.User.id_type(),
           nickname: String.t(),
           email: String.t(),
-          password: String.t() | charlist()
+          password: String.t(),
+          hashed_password: charlist()
         }
   @enforce_keys [:nickname, :email, :password]
-  defstruct [:id, :nickname, :email, :password]
+  defstruct [:id, :nickname, :email, :password, :hashed_password]
 
   def has_id?(%__MODULE__{} = authn), do: authn.id != nil
 end

@@ -48,6 +48,9 @@ defmodule MeowCave.MixProject do
       {:swoosh, "~> 1.3"},
       # HTTP 客户端
       {:finch, "~> 0.13"},
+      # 密码混淆
+      {:comeonin, "~> 5.4"},
+      {:pbkdf2_elixir, "~> 2.2"},
       # MeowCaveApp
       {:meowcave_app, in_umbrella: true}
     ]
