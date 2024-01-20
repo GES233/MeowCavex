@@ -47,7 +47,9 @@ defmodule MeowCave.MixProject do
       # 邮件客户端
       {:swoosh, "~> 1.3"},
       # HTTP 客户端
-      {:finch, "~> 0.13"}
+      {:finch, "~> 0.13"},
+      # MeowCaveApp
+      {:meowcave_app, in_umbrella: true}
     ]
   end
 

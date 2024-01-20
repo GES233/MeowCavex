@@ -1,4 +1,4 @@
-defmodule Domain.Status do
+defmodule Status do
   @moduledoc """
   提供通用的状态。
 

@@ -1,37 +1,37 @@
-defmodule Service.User do
+defmodule Member.Service do
   @moduledoc """
   关于用户的服务。
   """
 end
 
-defmodule Service.User.Register do
+defmodule Member.Service.Register do
   @moduledoc """
   注册服务。
   """
 
-  alias Domain.User
-  alias Domain.User.{Gender, Status, Locale}
-  alias Domain.User.Authentication, as: UserAuth
+  alias Member.User
+  alias Member.User.{Gender, Status, Locale}
+  alias Member.User.Authentication, as: MemberAuth
 
   # DTO2VO
 
-  @spec create_auth(maybe_improper_list() | map()) :: Domain.User.Authentication.t()
+  @spec create_auth(maybe_improper_list() | map()) :: Member.User.Authentication.t()
   def create_auth(fields), do: create_auth(fields[:nickname], fields[:email], fields[:password])
 
   @spec create_auth(charlist() | nil, String.t(), String.t()) ::
-          Domain.User.Authentication.t()
+          Member.User.Authentication.t()
   def create_auth(nickname, email, password) do
-    %UserAuth{id: nil, nickname: nickname, email: email, password: password}
+    %MemberAuth{id: nil, nickname: nickname, email: email, password: password}
   end
 
   def create_locale(prefer_lang, timezone), do: %Locale{lang: prefer_lang, timezone: timezone}
 
   # VO2Entity
 
-  @spec create_blank_user(Domain.User.Authentication.t(), Domain.User.Locale.t()) ::
-          Domain.User.t()
+  @spec create_blank_user(Member.User.Authentication.t(), Member.User.Locale.t()) ::
+          Member.User.t()
   def create_blank_user(
-        %UserAuth{nickname: nickname} = _userauth,
+        %MemberAuth{nickname: nickname} = _userauth,
         %Locale{timezone: timezone} = _locale
       ) do
     # 时区信息应该来自 DTO 。
@@ -52,12 +52,12 @@ defmodule Service.User.Register do
   # TODO: Conn with repo.
 end
 
-defmodule Service.User.UpdateLocale do
+defmodule Member.Service.UpdateLocale do
   @moduledoc """
   更新用户地区相关。
   """
 
-  alias Domain.User.Locale
+  alias Member.User.Locale
 
   @callback get_lang(any()) :: charlist()
   @callback get_timezone(any()) :: charlist()

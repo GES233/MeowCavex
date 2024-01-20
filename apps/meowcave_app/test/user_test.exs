@@ -1,10 +1,10 @@
-defmodule UserTest do
+defmodule MemberTest do
   use ExUnit.Case
-  # doctest Domain.User
+  # doctest Member.User
 
-  alias Domain.User
-  alias Domain.User.{Status, Gender, Authentication, Locale}
-  alias Service.User.Register
+  alias Member.User
+  alias Member.User.{Gender, Status, Authentication, Locale}
+  alias Member.Service.Register
 
   test "create user" do
     user_model =
