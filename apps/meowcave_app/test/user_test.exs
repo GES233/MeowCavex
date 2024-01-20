@@ -3,37 +3,38 @@ defmodule UserTest do
   # doctest Domain.User
 
   alias Domain.User
-  alias Domain.User.{Status, Gender}
+  alias Domain.User.{Status, Gender, Authentication, Locale}
+  alias Service.User.Register
 
   test "create user" do
-    user_info = [
-      nickname: "Quagmire",
-      email: "gleen@family.guys",
-      password: "Gigitty, gigitty"
-    ]
-
-    user_model = %User{
-      id: 1,
-      nickname: "Quagmire",
-      email: "gleen@family.guys",
-      password: "Gigitty, gigitty",
-      status: Status.create(),
-      gender: Gender.create(),
-      timezone: "UTC+0",  # TODO: Update.
-      info: "",
-      join_at: DateTime.utc_now()
-    }
+    user_model =
+      [
+        nickname: "Quagmire",
+        email: "gleen@family.guys",
+        password: "Gigitty, gigitty"
+      ]
+      |> Register.create_auth()
+      |> Register.create_blank_user(%Locale{
+        lang: "zh_Hans",
+        timezone: "Etc/UTC"
+      })
 
     # Update when map.
-      user = User.update(user_model, :nickname, "QgmrTheGigitty")
-      |> User.update(:gender, Gender.create() |> Gender.give(:male))
-       |> User.update(:info, "fxxk off, Brain.")
+    user =
+      User.update(user_model, :nickname, "QgmrTheGigitty")
+      |> User.update(
+        :gender,
+        Gender.create()
+        |> Gender.give(:male)
+      )
+      |> User.update(:info, "fxxk off, Brain.")
 
     assert user.nickname == "QgmrTheGigitty"
     assert Gender.get(user.gender) == :male
     assert user.info == "fxxk off, Brain."
 
-    no_public_gender_user = User.remove_info(user, :gender)
+    no_public_gender_user =
+      User.remove_info(user, :gender)
       |> User.remove_info(:info)
 
     assert Gender.secret?(no_public_gender_user.gender)
@@ -72,7 +73,8 @@ defmodule UserTest do
 
     # Modify
     hidden_user = Gender.hide(new_user)
-    assert Gender.get(hidden_user) == nil
+    # 隐藏性别用户的性别也是 :blank
+    assert Gender.get(hidden_user) == :blank
     explicit_user = Gender.expose(hidden_user)
     assert Gender.get(explicit_user) == :blank
 

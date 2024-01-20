@@ -7,7 +7,11 @@ defmodule MeowCave.Umbrella.MixProject do
       version: "0.1.0",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      compilers: [:leex] ++ Mix.compilers()
+      # in order to compile .xrl files, you must add
+      # "compilers: [:leex] ++ Mix.compilers()"
+      # to the "def project" section of your mix.exs
     ]
   end
 
