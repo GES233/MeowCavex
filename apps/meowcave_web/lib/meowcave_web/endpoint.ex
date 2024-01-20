@@ -48,5 +48,7 @@ defmodule MeowCaveWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+
+  # 将 Router 作为最后的一个 Plug（也就是说 Router 实在这些 Plug 的最后的）
   plug MeowCaveWeb.Router
 end

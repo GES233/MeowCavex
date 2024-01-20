@@ -10,14 +10,19 @@ defmodule MeowCaveWeb.Router do
   # 一个被叫做 `plug` 的原子与一个 `do` 语句块被输入
   # pipeline 宏里，后面的看不懂
   pipeline :browser do
-    plug :accepts, ["html"]
-    # 这里的 plug 并不是 Plug 里的那个。
+    # 这里的 plug 可以等同于 Plug 的。
     # 这个的逻辑很简单，先通过 expand_plug_and_opts/3 将其变成
     # {plug, opts}
     # 之后直接丢进对应 Router 的 @phoenix_pipeline 里
+    # 也就是说，这里所有的原子都对应着同名的函数。
+    plug :accepts, ["html"]
+    # accepts/2 来自 Phoenix.Controller
     plug :fetch_session
+    # fetch_session/2 来自 Plug.Conn
     plug :fetch_live_flash
+    # fetch_live_flash/2 来自 Phoenix.LiveView.Router
     plug :put_root_layout, html: {MeowCaveWeb.Layouts, :root}
+    # put_root_layout/2 来自 Phoenix.Controller
     plug :protect_from_forgery
     plug :put_secure_browser_headers
   end
@@ -30,6 +35,13 @@ defmodule MeowCaveWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/about", PageController, :about
+
+    # get "/u/:user", UserController, :other
+    # get "/u/me", UserController, :me
+    # get "/t/:thread", ThreadController, :access
+    # get "/p/:post", PostController, :access
+    # get "/gellary", GellaryController
   end
 
   # Other scopes may use custom stacks.

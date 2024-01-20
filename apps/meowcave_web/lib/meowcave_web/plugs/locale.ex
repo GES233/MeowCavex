@@ -1,4 +1,4 @@
-defmodule MeowcaveWeb.Plug.Locale do
+defmodule MeowcaveWeb.Plugs.Locale do
   @moduledoc """
   关于本地化（包括语言和时区）。
 
@@ -6,6 +6,8 @@ defmodule MeowcaveWeb.Plug.Locale do
 
   * 语言：用户选择 > 请求头的 `Accept-Language`
   * 时区：暂时放弃
+
+  其中，用户的选择通过请求中的 Cookie `Locale` 来保存。
   """
 
   @behaviour Plug
@@ -29,7 +31,10 @@ defmodule MeowcaveWeb.Plug.Locale do
 
   def get_valid_locales, do: @valid_locales
 
+  # @cookie_key "Locale"
+
   # defp from_param(), do: nil
   # defp from_headers(%Plug.Conn{req_headers: headers} = _conn), do: headers
+  # defp from_cookie(%Plug.Conn{} = _conn), do: nil
   # defp from_database(), do: nil
 end
