@@ -21,21 +21,21 @@ defmodule MemberTest do
 
     # Update when map.
     user =
-      User.update(user_model, :nickname, "QgmrTheGigitty")
-      |> User.update(
+      User.update!(user_model, :nickname, "QgmrTheGigitty")
+      |> User.update!(
         :gender,
         Gender.create()
         |> Gender.give(:male)
       )
-      |> User.update(:info, "fxxk off, Brain.")
+      |> User.update!(:info, "fxxk off, Brain.")
 
     assert user.nickname == "QgmrTheGigitty"
     assert Gender.get(user.gender) == :male
     assert user.info == "fxxk off, Brain."
 
     no_public_gender_user =
-      User.remove_info(user, :gender)
-      |> User.remove_info(:info)
+      User.remove_info!(user, :gender)
+      |> User.remove_info!(:info)
 
     assert Gender.secret?(no_public_gender_user.gender)
     assert no_public_gender_user.info == ""
@@ -78,7 +78,7 @@ defmodule MemberTest do
     explicit_user = Gender.expose(hidden_user)
     assert Gender.get(explicit_user) == :blank
 
-    female_user = mtf_user |> Gender.update(:female)
+    female_user = mtf_user |> Gender.update!(:female)
     assert Gender.get(female_user) == :female
   end
 end

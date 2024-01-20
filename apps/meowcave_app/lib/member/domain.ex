@@ -40,12 +40,12 @@ defmodule Member.User do
     :join_at
   ]
 
-  @spec update(Member.User.t(), atom(), any()) :: Member.User.t()
+  @spec update!(Member.User.t(), atom(), any()) :: Member.User.t()
   @doc """
   更新用户的数据。
   """
-  def update(user, field, content) do
-    {status, new_user, _info} = do_update(user, field, content)
+  def update!(user, field, content) do
+    {status, new_user, _info} = update(user, field, content)
 
     case status do
       :ok -> new_user
@@ -53,7 +53,7 @@ defmodule Member.User do
     end
   end
 
-  defp do_update(user, field, content) when is_map(content) do
+  def update(user, field, content) when is_map(content) do
     # Struct belongs to map.
     # When Status/Gender
     case field do
@@ -63,7 +63,7 @@ defmodule Member.User do
     end
   end
 
-  defp do_update(user, field, content) do
+  def update(user, field, content) do
     cond do
       field in [:nickname, :username, :info, :timezone] ->
         {:ok, Map.replace(user, field, content), nil}
@@ -76,26 +76,27 @@ defmodule Member.User do
     end
   end
 
-  @spec remove_info(Member.User.t(), atom()) :: Member.User.t()
+  @spec remove_info!(Member.User.t(), atom()) :: Member.User.t()
   @doc """
   移除用户的信息。
   """
-  def remove_info(user, field) do
-    {status, new_user, _info} = do_remove_info(user, field)
+  def remove_info!(user, field) do
+    {status, new_user, _info} = remove_info(user, field)
 
     case status do
       :ok -> new_user
       _ -> user
     end
+    # TODO: Add more error handling
   end
 
-  defp do_remove_info(user, field) do
+  def remove_info(user, field) do
     case field do
-      :gender -> do_update(user, :gender, Gender.hide(user.gender))
+      :gender -> update(user, :gender, Gender.hide(user.gender))
       # similar as Register
-      :nickname -> do_update(user, :nickname, "")
-      :info -> do_update(user, :info, "")
-      :timezone -> do_update(user, :timezone, "")
+      :nickname -> update(user, :nickname, "")
+      :info -> update(user, :info, "")
+      :timezone -> update(user, :timezone, "")
       # [:id, :username, :status, :join_at] -> user
       _ -> {:error, user, :field_invalid}
     end
@@ -258,29 +259,34 @@ defmodule Member.User.Gender do
   """
   def give(gender, new_gender) do
     if not hasgender?(gender) do
-      update(gender, new_gender)
+      update!(gender, new_gender)
     else
       gender
     end
   end
 
-  @spec update(Member.User.Gender.t(), atom()) :: Member.User.Gender.t()
+  @spec update!(Member.User.Gender.t(), atom()) :: Member.User.Gender.t()
   @doc """
   将性别更新到某值（更新成功的前提是新的性别是合法的）
   """
-  def update(gender, new_gender) do
-    gender_with_status = do_update(gender, new_gender)
+  def update!(gender, new_gender) do
+    {status, gender_or_error} = update(gender, new_gender)
 
-    case gender_with_status do
-      {:ok, gender} -> gender
-      {:error, gender, _invalid_gender} -> gender
+    case status do
+      :ok -> gender_or_error
+      :error -> gender
     end
+    # 大家看着这里可能好奇，我这样子写有卵用吗？
   end
 
-  defp do_update(gender, new_gender) do
+  @spec update(Member.User.Gender.t(), atom()) :: {:ok, Member.User.Gender.t()}
+  @doc """
+  将性别更新到某值，会返回状态以及结果
+  """
+  def update(gender, new_gender) do
     cond do
       new_gender in get_valid_values() -> {:ok, %__MODULE__{gender | value: new_gender}}
-      true -> {:error, gender, new_gender}
+      true -> {:error, new_gender}
     end
   end
 
