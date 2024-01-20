@@ -24,12 +24,16 @@ defmodule Service.User.Register do
     %UserAuth{id: nil, nickname: nickname, email: email, password: password}
   end
 
-  def create_locale(), do: %Locale{}
+  def create_locale(prefer_lang, timezone), do: %Locale{lang: prefer_lang, timezone: timezone}
 
   # VO2Entity
 
-  @spec create_blank_user(Domain.User.Authentication.t(), Domain.User.Locale.t()) :: Domain.User.t()
-  def create_blank_user(%UserAuth{nickname: nickname} = _userauth, %Locale{} = _locale) do
+  @spec create_blank_user(Domain.User.Authentication.t(), Domain.User.Locale.t()) ::
+          Domain.User.t()
+  def create_blank_user(
+        %UserAuth{nickname: nickname} = _userauth,
+        %Locale{timezone: timezone} = _locale
+      ) do
     # 时区信息应该来自 DTO 。
 
     current = DateTime.utc_now()
@@ -41,7 +45,7 @@ defmodule Service.User.Register do
       gender: Gender.create(),
       status: Status.create(),
       info: "",
-      join_at: current
+      join_at: DateTime.shift_zone!(current, timezone)
     }
   end
 
@@ -53,5 +57,11 @@ defmodule Service.User.UpdateLocale do
   更新用户地区相关。
   """
 
-  # 话说 Elixir 怎么实现类似于依赖注入的东西啊，难道只能通过 callback 或配置吗？
+  alias Domain.User.Locale
+
+  @callback get_lang(any()) :: charlist()
+  @callback get_timezone(any()) :: charlist()
+
+  def update_lang(%Locale{} = locale, lang), do: %Locale{locale | lang: lang}
+  def update_timezone(%Locale{} = locale, timezone), do: %Locale{locale | timezone: timezone}
 end

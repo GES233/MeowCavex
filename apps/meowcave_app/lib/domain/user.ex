@@ -294,10 +294,10 @@ defmodule Domain.User.Locale do
   但是用户的时区可能需要（就如果所谓 IP 属地一样），因此后者会持久化。
   """
   @type t :: %__MODULE__{
-    id: Domain.User.id_type(),
-    lang: charlist(),
-    timezone: charlist()
-  }
+          id: Domain.User.id_type(),
+          lang: charlist(),
+          timezone: charlist()
+        }
   defstruct [:id, :lang, :timezone]
 end
 
@@ -310,10 +310,13 @@ defmodule Domain.User.Authentication do
           email: String.t(),
           password: String.t() | charlist()
         }
+  @enforce_keys [:nickname, :email, :password]
   defstruct [:id, :nickname, :email, :password]
+
+  def has_id?(%__MODULE__{} = authn), do: authn.id != nil
 end
 
 defmodule Domain.User.Repo do
-  @callback create(Domain.User.t(), Domain.User.Authentication.t()) ::
-            {:ok, Domain.User.t()} | {:error, any()}
+  @callback create(Domain.User.t(), Domain.User.Authentication.t(), Domain.User.Locale.t()) ::
+              {:ok, Domain.User.t()} | {:error, any()}
 end
