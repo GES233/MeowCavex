@@ -318,7 +318,7 @@ defmodule Member.User.Authentication do
 end
 
 defmodule Member.User.Repo do
-  @callback create(Member.User.t(), Member.User.Authentication.t(), Member.User.Locale.t()) ::
+  @callback create(Member.User.Authentication.t(), Member.User.Locale.t()) ::
               {:ok, Member.User.t()} | {:error, any()}
 end
 
