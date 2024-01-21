@@ -27,6 +27,15 @@ defmodule MeowCaveWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :guest do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {MeowCaveWeb.PlainLayouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -36,12 +45,18 @@ defmodule MeowCaveWeb.Router do
 
     get "/", PageController, :home
     get "/about", PageController, :about
+    # get "/gellary", GellaryController
 
+    ## 保留一个登录的窗口
+    # ...
+    ## 计划设计的路由
+
+    # get "/" MeowPageController, :index
+    # get "/about" MeowPageController, :index
     # get "/u/:user", UserController, :other
     # get "/u/me", UserController, :me
     # get "/t/:thread", ThreadController, :access
     # get "/p/:post", PostController, :access
-    # get "/gellary", GellaryController
   end
 
   # Other scopes may use custom stacks.
