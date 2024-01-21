@@ -14,11 +14,13 @@ defmodule Member.Usecase.Register do
 
   * `Member.Service.EmailCollide` 邮件已经有用户注册了
   """
+  alias Member.User
   alias Member.Service.Register
 
   @default_repo MeowCave.Member
   @default_hash MeowCave.Member.User.PassHash
 
+  @spec call(String.t(), String.t(), String.t(), charlist(), charlist(), keyword(module())) :: User.t()
   def call(nickname, email, password, lang \\ "zh-Hans", timezone \\ "Etc/UTC", opts \\ []) do
     {hashlib, opts} = Keyword.pop(opts, :pass_hash, @default_hash)
 
@@ -48,10 +50,21 @@ defmodule Member.Usecase.ModifyInfo do
   @moduledoc """
   修改用户的信息。
   """
+
+  # @default_repo MeowCave.Member
 end
 
 defmodule Member.Usecase.UpdateStatus do
   @moduledoc """
   更改用户的状态，因为其和信息不同的性质。
   """
+
+  # alias Member.User
+  # alias Member.User.Status
+  # @default_repo MeowCave.Member
+
+  def update_status(), do: nil
+  def update_gender(), do: nil
+  def hide_gender(), do: nil
+  def expose_gender(), do: nil
 end

@@ -73,6 +73,19 @@ defmodule MeowCave.Member.UserRepo do
     }
   end
 
+  def from_domain(%User{} = user) do
+    %__MODULE__{
+      id: user.id,
+      username: user.username,
+      nickname: user.nickname,
+      status: user.status |> User.Status.value(),
+      gender: user.gender |> User.Gender.value(),
+      gender_visible: not (user.gender |> User.Gender.secret?()),
+      join_at: user.join_at,
+      info: user.info
+    }
+  end
+
   def to_domain(%__MODULE__{} = dao) do
     %User{
       id: dao.id,
