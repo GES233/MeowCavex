@@ -50,4 +50,15 @@ defmodule MeowCave.Member do
       :error -> {:error, user_or_changeset}
     end
   end
+
+  @impl true
+  def get_user_by_id(id) do
+    user_or_nil = MeowCave.Repo.get(UserRepo, id)
+
+    if is_nil(user_or_nil) do
+      nil
+    else
+      user_or_nil |> UserRepo.to_domain()
+    end
+  end
 end

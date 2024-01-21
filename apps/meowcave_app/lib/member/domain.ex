@@ -439,6 +439,8 @@ defmodule Member.User.Repo do
   @callback update_user_info(Member.User.t(), map(), boolean(), boolean()) ::
               {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
               | {:error, any()}
+
+  @callback get_user_by_id(pos_integer()) :: Member.User.t() | nil
 end
 
 defmodule Member.Invite do
