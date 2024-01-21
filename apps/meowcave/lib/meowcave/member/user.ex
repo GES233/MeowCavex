@@ -45,6 +45,7 @@ defmodule MeowCave.Member.UserRepo do
       :timezone,
       :lang
     ])
+    |> unique_constraint([:email])
     |> set_anomynous_nickname()
   end
 

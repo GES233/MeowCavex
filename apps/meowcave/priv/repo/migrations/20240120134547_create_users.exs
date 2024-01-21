@@ -3,7 +3,7 @@ defmodule MeowCave.Repo.Migrations.CreateUsers do
 
   def change do
     create table(:users) do
-      add :username, :string
+      add :username, :string, null: :true
       add :nickname, :string
       add :status, :string
       add :gender, :string
@@ -17,5 +17,9 @@ defmodule MeowCave.Repo.Migrations.CreateUsers do
 
       timestamps()
     end
+
+    create index(:users, :nickname)
+    create unique_index(:users, :username)
+    create unique_index(:users, :email)
   end
 end

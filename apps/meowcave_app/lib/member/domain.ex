@@ -432,9 +432,7 @@ defmodule Member.User.Repo do
   @callback create(Member.User.Authentication.t(), Member.User.Locale.t()) ::
               {:ok, Member.User.t()} | {:error, any()}
 
-  @callback update_user_info(Member.User.t(), map() | keyword()) ::
-              {:ok, Member.User.t()} | {:error, any()}
-  @callback update_user_info(Member.User.t(), atom(), any()) ::
+  @callback update_user_info(Member.User.t(), map()) ::
               {:ok, Member.User.t()} | {:error, any()}
 end
 
