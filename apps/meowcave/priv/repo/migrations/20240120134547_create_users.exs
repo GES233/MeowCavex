@@ -3,7 +3,7 @@ defmodule MeowCave.Repo.Migrations.CreateUsers do
 
   def change do
     create table(:users) do
-      add :username, :string, null: :true
+      add :username, :string, null: true
       add :nickname, :string
       add :status, :string
       add :gender, :string

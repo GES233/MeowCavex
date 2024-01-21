@@ -13,8 +13,9 @@ defmodule MeowCave.Member do
     {status, user_or_changeset} =
       UserRepo.from_domain(authentication_field, locale_field)
       |> Repo.insert()
-      # insert 的默认设置的 :on_conflict 为 :raise
-      # 最好改为 :ignore
+
+    # insert 的默认设置的 :on_conflict 为 :raise
+    # 最好改为 :ignore
 
     case status do
       :ok -> {:ok, user_or_changeset |> UserRepo.to_domain()}
@@ -23,21 +24,22 @@ defmodule MeowCave.Member do
   end
 
   @valid_fields [
-      :username,
-      :nickname,
-      :status,
-      :gender,
-      :gender_visible,
-      :info,
-      :email,
-      :password,
-      :timezone,
-      :lang
+    :username,
+    :nickname,
+    :status,
+    :gender,
+    :gender_visible,
+    :info,
+    :email,
+    :password,
+    :timezone,
+    :lang
   ]
 
   @impl true
   def update_user_info(%User{} = targer_user, updated_items, locale, auth) do
-    changeset = Ecto.Changeset.cast(UserRepo.from_domain(targer_user), updated_items, @valid_fields)
+    changeset =
+      Ecto.Changeset.cast(UserRepo.from_domain(targer_user), updated_items, @valid_fields)
 
     {status, user_or_changeset} =
       changeset

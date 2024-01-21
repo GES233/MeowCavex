@@ -50,7 +50,8 @@ defmodule Member.Service.Register do
       gender: Gender.create(),
       status: Status.create(),
       info: "",
-      join_at: current  # DateTime.shift_zone!(current, timezone)
+      # DateTime.shift_zone!(current, timezone)
+      join_at: current
     }
   end
 

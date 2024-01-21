@@ -68,7 +68,8 @@ defmodule Member.Usecase.ModifyInfo do
   def update_service(%User{} = user, field, new_value, opts \\ []) do
     %{repo: repo, auth: auth, locale: locale} = parse_deps(opts)
 
-    {status, new_user_or_changeset} = repo.update_user_info(user, %{field => new_value}, locale, auth)
+    {status, new_user_or_changeset} =
+      repo.update_user_info(user, %{field => new_value}, locale, auth)
 
     case status do
       :ok -> new_user_or_changeset

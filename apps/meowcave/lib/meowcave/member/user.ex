@@ -104,11 +104,13 @@ defmodule MeowCave.Member.UserRepo do
           info: dao.info,
           join_at: dao.join_at
         }
+
       {true, false} ->
         %User.Locale{
-        lang: dao.lang,
-        timezone: dao.timezone
+          lang: dao.lang,
+          timezone: dao.timezone
         }
+
       {false, true} ->
         %User.Authentication{
           id: dao.id,
@@ -116,7 +118,9 @@ defmodule MeowCave.Member.UserRepo do
           email: dao.email,
           password: dao.password
         }
-      {true, true} -> nil
+
+      {true, true} ->
+        nil
     end
   end
 end
