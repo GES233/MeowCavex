@@ -87,21 +87,37 @@ defmodule MeowCave.Member.UserRepo do
     }
   end
 
-  def to_domain(%__MODULE__{} = dao) do
-    %User{
-      id: dao.id,
-      username: dao.username,
-      nickname: dao.nickname,
-      gender: %User.Gender{
-        value: dao.gender,
-        hidden: not dao.gender_visible
-      },
-      status: %User.Status{
-        value: dao.status
-      },
-      info: dao.info,
-      join_at: dao.join_at
-    }
+  def to_domain(%__MODULE__{} = dao, locale \\ false, auth \\ false) do
+    case {locale, auth} do
+      {false, false} ->
+        %User{
+          id: dao.id,
+          username: dao.username,
+          nickname: dao.nickname,
+          gender: %User.Gender{
+            value: dao.gender,
+            hidden: not dao.gender_visible
+          },
+          status: %User.Status{
+            value: dao.status
+          },
+          info: dao.info,
+          join_at: dao.join_at
+        }
+      {true, false} ->
+        %User.Locale{
+        lang: dao.lang,
+        timezone: dao.timezone
+        }
+      {false, true} ->
+        %User.Authentication{
+          id: dao.id,
+          nickname: dao.nickname,
+          email: dao.email,
+          password: dao.password
+        }
+      {true, true} -> nil
+    end
   end
 end
 

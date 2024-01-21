@@ -58,15 +58,17 @@ defmodule Member.Usecase.ModifyInfo do
   @default_repo MeowCave.Member
 
   defp parse_deps(opts) do
-    {repo, _opts} = Keyword.pop(opts, :repo, @default_repo)
+    {repo, opts} = Keyword.pop(opts, :repo, @default_repo)
+    {locale, opts} = Keyword.pop(opts, :locale, false)
+    {auth, _opts} = Keyword.pop(opts, :auth, false)
 
-    %{repo: repo}
+    %{repo: repo, locale: locale, auth: auth}
   end
 
   def update_service(%User{} = user, field, new_value, opts \\ []) do
-    %{repo: repo} = parse_deps(opts)
+    %{repo: repo, auth: auth, locale: locale} = parse_deps(opts)
 
-    {status, new_user_or_changeset} = repo.update_user_info(user, %{field => new_value})
+    {status, new_user_or_changeset} = repo.update_user_info(user, %{field => new_value}, locale, auth)
 
     case status do
       :ok -> new_user_or_changeset
@@ -88,10 +90,10 @@ defmodule Member.Usecase.ModifyLocaleInfo do
   alias Member.Usecase.ModifyInfo
 
   def update_timezone(user, new_timezone),
-    do: ModifyInfo.update_service(user, :timezone, new_timezone)
+    do: ModifyInfo.update_service(user, :timezone, new_timezone, locale: true)
 
   def update_language(user, new_language),
-    do: ModifyInfo.update_service(user, :lang, new_language)
+    do: ModifyInfo.update_service(user, :lang, new_language, locale: true)
 end
 
 defmodule Member.Usecase.ModifySentitiveInfo do

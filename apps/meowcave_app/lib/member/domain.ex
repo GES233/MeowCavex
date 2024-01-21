@@ -91,8 +91,11 @@ defmodule Member.User do
     status_opt = fn user, status_transform ->
       cond do
         status_transform in Member.User.Status.get_opt_list() ->
-          {:ok, Map.replace(user, :status, apply(Member.User.Status, status_transform, [user.status]))}
-        true -> {:error, :content_invalid}
+          {:ok,
+           Map.replace(user, :status, apply(Member.User.Status, status_transform, [user.status]))}
+
+        true ->
+          {:error, :content_invalid}
       end
     end
 
@@ -150,7 +153,8 @@ defmodule Member.User do
 
     @impl true
     def exception(invalid_field) do
-      msg = "The field you attempt to contrive or write(#{inspect(invalid_field)}) is invalid here."
+      msg =
+        "The field you attempt to contrive or write(#{inspect(invalid_field)}) is invalid here."
 
       %FieldInvalidError{message: msg}
     end
@@ -432,8 +436,9 @@ defmodule Member.User.Repo do
   @callback create(Member.User.Authentication.t(), Member.User.Locale.t()) ::
               {:ok, Member.User.t()} | {:error, any()}
 
-  @callback update_user_info(Member.User.t(), map()) ::
-              {:ok, Member.User.t()} | {:error, any()}
+  @callback update_user_info(Member.User.t(), map(), boolean(), boolean()) ::
+              {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
+              | {:error, any()}
 end
 
 defmodule Member.Invite do
