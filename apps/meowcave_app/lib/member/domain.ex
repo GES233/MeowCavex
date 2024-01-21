@@ -14,6 +14,7 @@ defmodule Member.User do
   """
 
   import Status
+  alias Member.User.ContentInvalidError
   alias Member.User.{Gender}
   alias Member.User.FieldInvalidError
 
@@ -46,15 +47,24 @@ defmodule Member.User do
   更新用户的数据。
   """
   def update!(user, field, content) do
-    {status, new_user, info} = update(user, field, content)
+    {status, new_user_or_info} = update(user, field, content)
 
     case status do
-      :ok -> new_user
-      _ -> case info do
-        :field_invalid -> raise FieldInvalidError, field
-        _ -> raise "Reserved error with unknown error info #{inspect(info)}"
-        # Reserved
-      end
+      :ok ->
+        new_user_or_info
+
+      _ ->
+        case new_user_or_info do
+          :field_invalid ->
+            raise FieldInvalidError, field
+
+          :content_invalid ->
+            raise ContentInvalidError, content: content, field: field
+
+          _ ->
+            raise "Reserved error with unknown error info #{inspect(new_user_or_info)}"
+            # Reserved
+        end
     end
   end
 
@@ -62,22 +72,42 @@ defmodule Member.User do
     # Struct belongs to map.
     # When Status/Gender
     case field do
-      :gender -> {:ok, Map.replace(user, :gender, content), nil}
-      :status -> {:ok, Map.replace(user, :status, content), nil}
-      _ -> {:error, user, :field_invalid}
+      :gender -> {:ok, Map.replace(user, :gender, content)}
+      :status -> {:ok, Map.replace(user, :status, content)}
+      _ -> {:error, :field_invalid}
     end
   end
 
   def update(user, field, content) do
+    gender_opt = fn user, new_content ->
+      {status, gender_or_err} = Gender.update(user.gender, new_content)
+
+      case status do
+        :ok -> {:ok, Map.replace(user, :gender, gender_or_err)}
+        :error -> {:error, :content_invalid}
+      end
+    end
+
+    status_opt = fn user, status_transform ->
+      cond do
+        status_transform in Member.User.Status.get_opt_list() ->
+          {:ok, Map.replace(user, :status, apply(Member.User.Status, status_transform, [user.status]))}
+        true -> {:error, :content_invalid}
+      end
+    end
+
     cond do
-      field in [:nickname, :username, :info, :timezone] ->
-        {:ok, Map.replace(user, field, content), nil}
+      field in [:nickname, :username, :info] ->
+        {:ok, Map.replace(user, field, content)}
 
       field == :gender ->
-        {:ok, Map.replace(user, :gender, Gender.give(user.gender, content)), nil}
+        gender_opt.(user, content)
+
+      field == :status ->
+        status_opt.(user, content)
 
       true ->
-        {:error, user, :content_invalid}
+        {:error, :field_invalid}
     end
   end
 
@@ -86,15 +116,21 @@ defmodule Member.User do
   移除用户的信息。
   """
   def remove_info!(user, field) do
-    {status, new_user, info} = remove_info(user, field)
+    {status, new_user_or_info} = remove_info(user, field)
 
     case status do
-      :ok -> new_user
-      _ -> case info do
-        :field_invalid -> raise FieldInvalidError, field
-        _ -> raise "Reserved error with unknown error info #{inspect(info)}"
-        # Reserved
-      end
+      :ok ->
+        new_user_or_info
+
+      _ ->
+        case new_user_or_info do
+          :field_invalid ->
+            raise FieldInvalidError, field
+
+          _ ->
+            raise "Reserved error with unknown error info #{inspect(new_user_or_info)}"
+            # Reserved
+        end
     end
   end
 
@@ -104,9 +140,8 @@ defmodule Member.User do
       # similar as Register
       :nickname -> update(user, :nickname, "")
       :info -> update(user, :info, "")
-      :timezone -> update(user, :timezone, "")
       # [:id, :username, :status, :join_at] -> user
-      _ -> {:error, user, :field_invalid}
+      _ -> {:error, :field_invalid}
     end
   end
 
@@ -115,9 +150,21 @@ defmodule Member.User do
 
     @impl true
     def exception(invalid_field) do
-      msg = "The field you attempt to contrive or write(#{inspect(invalid_field)}) is invalid."
+      msg = "The field you attempt to contrive or write(#{inspect(invalid_field)}) is invalid here."
 
       %FieldInvalidError{message: msg}
+    end
+  end
+
+  defmodule ContentInvalidError do
+    defexception [:message]
+
+    @impl true
+    def exception(invalid_content) do
+      msg =
+        "The content(#{inspect(invalid_content[:content])}) in #{inspect(invalid_content[:field])} is invalid."
+
+      %ContentInvalidError{message: msg}
     end
   end
 end
@@ -140,6 +187,9 @@ defmodule Member.User.Status do
   def interactive?(status), do: under(status, [:normal, :freeze])
 
   ## Operate
+
+  @opt_list [:activate, :delete, :freeze, :block]
+  def get_opt_list(), do: @opt_list
 
   @spec activate(Member.User.Status.t()) :: Member.User.Status.t()
   def activate(status) do
@@ -273,15 +323,25 @@ defmodule Member.User.Gender do
   """
   def expose(gender), do: %__MODULE__{gender | hidden: false}
 
+  def give!(gender, new_gender) do
+    {status, gender_or_err} = give(gender, new_gender)
+
+    case status do
+      :ok -> gender_or_err
+      :has_gender -> gender_or_err
+      :error -> raise GenderTooDiverseException, gender_or_err
+    end
+  end
+
   @spec give(Member.User.Gender.t(), atom()) :: Member.User.Gender.t()
   @doc """
   当性别为 `blank` 时给予性别。
   """
   def give(gender, new_gender) do
     if not hasgender?(gender) do
-      update!(gender, new_gender)
+      update(gender, new_gender)
     else
-      gender
+      {:has_gender, gender}
     end
   end
 
@@ -298,7 +358,7 @@ defmodule Member.User.Gender do
     end
   end
 
-  @spec update(Member.User.Gender.t(), atom()) :: {:ok, Member.User.Gender.t()}
+  @spec update(Member.User.Gender.t(), atom()) :: {:ok, Member.User.Gender.t()} | {:error, any()}
   @doc """
   将性别更新到某值，会返回状态以及结果
   """
@@ -372,7 +432,10 @@ defmodule Member.User.Repo do
   @callback create(Member.User.Authentication.t(), Member.User.Locale.t()) ::
               {:ok, Member.User.t()} | {:error, any()}
 
-  # @callback update_user_info(Member.User.t()) :: Member.User.t()
+  @callback update_user_info(Member.User.t(), map() | keyword()) ::
+              {:ok, Member.User.t()} | {:error, any()}
+  @callback update_user_info(Member.User.t(), atom(), any()) ::
+              {:ok, Member.User.t()} | {:error, any()}
 end
 
 defmodule Member.Invite do

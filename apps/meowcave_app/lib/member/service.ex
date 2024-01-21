@@ -37,7 +37,7 @@ defmodule Member.Service.Register do
           Member.User.t()
   def create_blank_user(
         %MemberAuth{nickname: nickname} = _userauth,
-        %Locale{timezone: timezone} = _locale
+        %Locale{timezone: _timezone} = _locale
       ) do
     # 时区信息应该来自 DTO 。
 
@@ -50,7 +50,7 @@ defmodule Member.Service.Register do
       gender: Gender.create(),
       status: Status.create(),
       info: "",
-      join_at: DateTime.shift_zone!(current, timezone)
+      join_at: current  # DateTime.shift_zone!(current, timezone)
     }
   end
 

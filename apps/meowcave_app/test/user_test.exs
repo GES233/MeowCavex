@@ -1,10 +1,12 @@
-defmodule MemberTest do
+defmodule UserTest do
   use ExUnit.Case
   # doctest Member.User
 
   alias Member.User
-  alias Member.User.{Gender, Status, Authentication, Locale}
+  alias Member.User.{Gender, Status, Locale}
   alias Member.Service.Register
+
+  ## 偏向应用层面的测试
 
   test "create user" do
     user_model =
@@ -25,7 +27,7 @@ defmodule MemberTest do
       |> User.update!(
         :gender,
         Gender.create()
-        |> Gender.give(:male)
+        |> Gender.give!(:male)
       )
       |> User.update!(:info, "fxxk off, Brain.")
 
@@ -80,5 +82,87 @@ defmodule MemberTest do
 
     female_user = mtf_user |> Gender.update!(:female)
     assert Gender.get(female_user) == :female
+  end
+
+  ## 偏向细节的测试
+
+  test "user update safe function" do
+    default_user =
+      Register.create_auth("A", "a@example.com", "123456")
+      |> Register.create_blank_user(Register.create_locale("zh-Hans", "Asia/Shanghai"))
+
+    # Member.User.update/3 with map
+    new_gender =
+      Gender.create()
+      |> Gender.give!(:female)
+
+    new_status = Status.activate(default_user.status)
+
+    assert {:ok, user_updated_gender} =
+             default_user
+             |> User.update(:gender, new_gender)
+
+    assert {:ok, user_updated_status} =
+             user_updated_gender
+             |> User.update(:status, new_status)
+
+    assert {:error, _} =
+             user_updated_status
+             |> User.update(:info, %{Name: "A", University: "WCU(Wild Chicken University)"})
+
+    # Member.User.update/3 with others
+    assert {:ok, user_with_gender_updated} =
+             user_updated_status
+             |> User.update(:gender, :non_bisexual)
+
+    assert user_with_gender_updated.gender.value == :non_bisexual
+
+    assert {:error, _more_colorful_gender} =
+             user_updated_gender
+             |> User.update(:gender, :a_delightful_gender_with_full_of_pround)
+
+    assert {:ok, user_with_status_updated} =
+             user_updated_gender
+             |> User.update(:status, :activate)
+
+    assert user_with_status_updated.status.value == :normal
+
+    assert {:error, _unknown_oprate} =
+             user_updated_status
+             |> User.update(:status, :eat)
+
+    assert {:ok, user_with_nickname_updated} =
+             user_with_gender_updated
+             |> User.update(:nickname, "Aa")
+
+    assert user_with_nickname_updated.nickname == "Aa"
+
+    assert {:ok, user_with_info_updated} =
+             user_with_nickname_updated
+             |> User.update(:info, "不可以涩涩")
+
+    assert String.contains?(user_with_info_updated.info, "涩")
+
+    assert {:error, _tried_to_change_id} =
+             user_with_info_updated
+             |> User.update(:id, 8)
+  end
+
+  test "remove info safe function" do
+    default_user =
+      Register.create_auth("A", "a@example.com", "123456")
+      |> Register.create_blank_user(Register.create_locale("zh-Hans", "Asia/Shanghai"))
+
+    {:ok, updated_nickname_user} =
+      default_user
+      |> User.update(:nickname, "FaQ")
+
+    {:ok, updated_info} =
+      updated_nickname_user
+      |> User.update(:info, "酸萝卜别吃！")
+
+    {:ok, updated_gender} =
+      updated_info
+      |> User.update(:gender, :female)
   end
 end
