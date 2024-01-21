@@ -90,10 +90,10 @@ defmodule Member.Usecase.ModifyLocaleInfo do
 
   alias Member.Usecase.ModifyInfo
 
-  def update_timezone(user, new_timezone),
+  def timezone(user, new_timezone),
     do: ModifyInfo.update_service(user, :timezone, new_timezone, locale: true)
 
-  def update_language(user, new_language),
+  def language(user, new_language),
     do: ModifyInfo.update_service(user, :lang, new_language, locale: true)
 end
 

@@ -423,7 +423,7 @@ defmodule Member.User.Authentication do
           password: String.t(),
           hashed_password: charlist()
         }
-  @enforce_keys [:nickname, :email, :password]
+  @enforce_keys [:nickname, :email]
   defstruct [:id, :nickname, :email, :password, :hashed_password]
 
   def has_id?(%__MODULE__{} = authn), do: authn.id != nil
