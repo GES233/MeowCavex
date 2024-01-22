@@ -20,10 +20,17 @@ defmodule Member.Usecase.Register do
   @default_repo MeowCave.Member
   @default_hash MeowCave.Member.User.PassHash
 
+  defp parse_deps(opts) do
+    {repo, opts} = Keyword.pop(opts, :repo, @default_repo)
+    {pass_hash, _opts} = Keyword.pop(opts, :pass_hash, @default_hash)
+
+    %{repo: repo, pass_hash: pass_hash}
+  end
+
   @spec call(String.t(), String.t(), String.t(), charlist(), charlist(), keyword(module())) ::
           User.t()
   def call(nickname, email, password, lang \\ "zh-Hans", timezone \\ "Etc/UTC", opts \\ []) do
-    {hashlib, opts} = Keyword.pop(opts, :pass_hash, @default_hash)
+    %{repo: repo, pass_hash: hashlib} = parse_deps(opts)
 
     locale_field = Register.create_locale(lang, timezone)
 
@@ -31,8 +38,6 @@ defmodule Member.Usecase.Register do
       Register.create_auth(nickname, email, password)
       | hashed_password: hashlib.generate_hash(password)
     }
-
-    {repo, _opts} = Keyword.pop(opts, :repo, @default_repo)
 
     {status, user_or_changeset} = repo.create(auth_field, locale_field)
 
@@ -78,9 +83,12 @@ defmodule Member.Usecase.ModifyInfo do
   end
 
   # 来自领域模型
-  def nickname(user, new_nickname), do: update_service(user, :nickname, new_nickname)
-  def username(user, new_username), do: update_service(user, :username, new_username)
-  def info(user, new_info), do: update_service(user, :info, new_info)
+  def nickname(user, new_nickname, opts \\ []),
+    do: update_service(user, :nickname, new_nickname, opts)
+  def username(user, new_username, opts \\ []),
+    do: update_service(user, :username, new_username, opts)
+  def info(user, new_info, opts \\ []),
+    do: update_service(user, :info, new_info, opts)
 end
 
 defmodule Member.Usecase.ModifyLocaleInfo do
@@ -88,13 +96,14 @@ defmodule Member.Usecase.ModifyLocaleInfo do
   和 `Member.Usecase.ModifyInfo` 在应用层面不同，但是本质上是一样的。
   """
 
+  alias Member.User
   alias Member.Usecase.ModifyInfo
 
-  def timezone(user, new_timezone),
-    do: ModifyInfo.update_service(user, :timezone, new_timezone, locale: true)
+  def timezone(%User{} = user, new_timezone, opts \\ []),
+    do: ModifyInfo.update_service(user, :timezone, new_timezone, [locale: true] ++ opts)
 
-  def language(user, new_language),
-    do: ModifyInfo.update_service(user, :lang, new_language, locale: true)
+  def language(%User{} = user, new_language, opts \\ []),
+    do: ModifyInfo.update_service(user, :lang, new_language, [locale: true] ++ opts)
 end
 
 defmodule Member.Usecase.ModifySentitiveInfo do
