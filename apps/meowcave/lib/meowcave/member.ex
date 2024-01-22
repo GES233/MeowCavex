@@ -13,10 +13,6 @@ defmodule MeowCave.Member do
     {status, user_or_changeset} =
       UserRepo.from_domain(authentication_field, locale_field)
       |> Repo.insert()
-
-    # insert 的默认设置的 :on_conflict 为 :raise
-    # 最好改为 :ignore
-
     case status do
       :ok -> {:ok, user_or_changeset |> UserRepo.to_domain()}
       :error -> {:error, user_or_changeset}
@@ -24,6 +20,7 @@ defmodule MeowCave.Member do
   end
 
   @valid_fields [
+    # 参见 MeowCave.Member.User 的那些 fields
     :username,
     :nickname,
     :status,
