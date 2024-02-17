@@ -435,6 +435,8 @@ defmodule Member.User.Repo do
   """
   @callback create(Member.User.Authentication.t(), Member.User.Locale.t()) ::
               {:ok, Member.User.t()} | {:error, any()}
+  # 不是纯函数，可能需要加上时间戳，
+  # 但是 `id` 也是不可知的。
 
   @callback update_user_info(Member.User.t(), map(), boolean(), boolean()) ::
               {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
@@ -450,7 +452,28 @@ defmodule Member.Invite do
   """
 
   @type t :: %__MODULE__{
-          user_id: Member.User.id_type()
+          host_id: Member.User.id_type(),
+          guest_id: Member.User.id_type(),
+          invite_at: DateTime.t()
         }
-  defstruct [:user_id]
+
+  # 用 `User.id_type` 还是 `User.t` 值得讨论下。
+  defstruct [:host_id, :guest_id, :invite_at]
+end
+
+defmodule Member.Invite.Repo do
+  @moduledoc false
+
+  @callback append_invitation_code(Member.User.t(), String.t() | charlist(), DateTime.t()) ::
+              {:ok | :error, any()}
+
+  @callback verify_invitation_code(String.t()) :: boolean()
+
+  @callback append_invite(Member.User.t(), Member.User.t()) :: Member.Invite.t()
+
+  @callback verify_invite(Member.User.t(), Member.User.t()) :: {:ok, boolean()} | {:error, any()}
+
+  @callback get_host(Member.User.t()) :: {:ok, Member.User.t() | nil} | {:error, any()}
+
+  @callback get_guests(Member.User.t()) :: {:ok, list(Member.User.t()) | nil} | {:error, any()}
 end
