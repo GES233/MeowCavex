@@ -153,8 +153,18 @@ defmodule Member.Usecase.ModifyUser do
     end
   end
 
-  defmodule Member.Usecase.ModifyUser.UsernameCollide do
+  defmodule UsernameCollide do
     # TODO
+  end
+
+  defmodule ModifyUsernameFailure do
+    # 按照用户注册时间开始算吧，如果真的从修改用户名记
+    # 时间戳的话得累死；或者是干脆设成不能修改的。
+    # TODO
+  end
+
+  defmodule InfoNotAllowed do
+    # TODO: 接上个关键词或 NLP 实现过滤
   end
 end
 
