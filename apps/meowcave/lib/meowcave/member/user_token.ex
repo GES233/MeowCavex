@@ -10,12 +10,13 @@ defmodule MeowCave.Member.UserTokenRepo do
   schema "user_tokens" do
     field :token, :binary
     # TODO: update with Ecto.Enum
-    field :context, :string
+    field :context, :map
     field :scope, :string
     field :sent_to, :string
     belongs_to :users, MeowCave.Member.UserRepo
 
-    timestamps(updated_at: false)
+    timestamps(updated_at: false, type: :utc_datetime)
+    # field :expired_at, :utc_datetime
   end
 
   ## Application related
