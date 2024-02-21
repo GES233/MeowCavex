@@ -157,25 +157,25 @@ defmodule Member.Usecase.ModifyLocaleInfo do
 
   def timezone(%User{} = user, new_timezone, opts \\ []) do
     case Modify.update_service(
-        user,
-        :timezone,
-        new_timezone,
-        [locale: true] ++ Keyword.take(opts, [:repo])
-      ) do
-        {:ok, user} -> user
-        {:error, changeset} -> changeset
-      end
+           user,
+           :timezone,
+           new_timezone,
+           [locale: true] ++ Keyword.take(opts, [:repo])
+         ) do
+      {:ok, user} -> user
+      {:error, changeset} -> changeset
+    end
   end
 
   def language(%User{} = user, new_language, opts \\ []) do
     case Modify.update_service(
-        user,
-        :lang,
-        new_language,
-        [locale: true] ++ Keyword.take(opts, [:repo])
-      ) do
-        {:ok, user} -> user
-        {:error, changeset} -> changeset
+           user,
+           :lang,
+           new_language,
+           [locale: true] ++ Keyword.take(opts, [:repo])
+         ) do
+      {:ok, user} -> user
+      {:error, changeset} -> changeset
     end
   end
 end

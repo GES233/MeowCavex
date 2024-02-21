@@ -6,16 +6,15 @@ end
 
 defmodule Account.TokenPayload do
   @type t :: %__MODULE__{
-    token_id: charlist(),
-    user_id: Member.User.id_type(),
-    scope: atom(),
-    type: atom(),
-  }
+          token_id: charlist(),
+          user_id: Member.User.id_type(),
+          scope: atom(),
+          type: atom()
+        }
   defstruct [:token_id, :user_id, :scope, :type]
 end
 
 defmodule Account.TokenRepo do
-
   alias Account.TokenPayload
   alias Member.User
 

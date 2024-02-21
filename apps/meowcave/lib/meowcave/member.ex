@@ -25,7 +25,8 @@ defmodule MeowCave.Member do
 
   @impl true
   def update_user_info(%User{} = targer_user, updated_items, locale, auth) do
-    update_changeset = targer_user
+    update_changeset =
+      targer_user
       |> UserRepo.from_domain()
       |> UserRepo.update_changeset(updated_items)
 

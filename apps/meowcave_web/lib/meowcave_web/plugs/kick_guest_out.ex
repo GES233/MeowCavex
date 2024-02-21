@@ -33,5 +33,6 @@ defmodule MeowCaveWeb.KickGuestOut do
   defp maybe_halt(true, conn) do
     conn
   end
+
   defp maybe_halt(false, conn), do: conn
 end
