@@ -109,6 +109,17 @@ defmodule Member.Usecase.Modify do
   defp do_update_service(%User{} = user, %{} = values, repo, locale, auth) do
     repo.update_user_info(user, values, locale, auth)
   end
+
+  @doc """
+  批量更改。
+
+  用于用户主页的修改。
+  """
+  def multiple_update_service(%User{} = user, values, opts \\ []) do
+    %{repo: repo, auth: auth, locale: locale} = parse_deps(opts)
+
+    do_update_service(user, values, repo, locale, auth)
+  end
 end
 
 defmodule Member.Usecase.ModifyUser do
