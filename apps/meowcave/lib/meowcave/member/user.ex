@@ -30,9 +30,8 @@ defmodule MeowCave.Member.UserRepo do
 
   ## Changeset
 
-  def changeset(user, attrs \\ %{}) do
-    user
-    |> cast(attrs, [
+  defp changeset_prelude(%__MODULE__{} = user, attrs) do
+    cast(user, attrs, [
       :username,
       :nickname,
       :status,
@@ -45,6 +44,13 @@ defmodule MeowCave.Member.UserRepo do
       :timezone,
       :lang
     ])
+  end
+
+  defp changeset_prelude(%Ecto.Changeset{} = changeset, _attrs), do: changeset
+
+  def create_user_changeset(user, attrs \\ %{}) do
+    user
+    |> changeset_prelude(attrs)
     |> unique_constraint([:email], message: "has already been taken")
     |> set_anomynous_nickname()
   end
@@ -57,6 +63,11 @@ defmodule MeowCave.Member.UserRepo do
     else
       changeset
     end
+  end
+
+  def update_changeset(user, updated_items) do
+    user
+    |> changeset_prelude(updated_items)
   end
 
   ## Application related.
@@ -85,7 +96,7 @@ defmodule MeowCave.Member.UserRepo do
       nickname: user.nickname,
       status: User.Status.value(user.status),
       gender: User.Gender.value(user.gender),
-      gender_visible: not (User.Gender.secret?(user.gender)),
+      gender_visible: not User.Gender.secret?(user.gender),
       join_at: user.join_at,
       info: user.info
     }

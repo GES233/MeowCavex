@@ -12,7 +12,7 @@ defmodule MeowCave.Member do
   def create(%User.Authentication{} = authentication_field, %User.Locale{} = locale_field) do
     user =
       UserRepo.from_domain(authentication_field, locale_field)
-      |> UserRepo.changeset()
+      |> UserRepo.create_user_changeset()
 
     case Repo.insert(user, on_conflict: :raise) do
       {:ok, user} ->
@@ -20,28 +20,14 @@ defmodule MeowCave.Member do
 
       {:error, changeset} ->
         {:error, changeset}
-        # Send it, and raise custom exception in usecase layer.
     end
   end
 
-  @valid_fields [
-    # 参见 MeowCave.Member.User 的那些 fields
-    :username,
-    :nickname,
-    :status,
-    :gender,
-    :gender_visible,
-    :info,
-    :email,
-    :password,
-    :timezone,
-    :lang
-  ]
-
   @impl true
   def update_user_info(%User{} = targer_user, updated_items, locale, auth) do
-    update_changeset =
-      Ecto.Changeset.cast(UserRepo.from_domain(targer_user), updated_items, @valid_fields)
+    update_changeset = targer_user
+      |> UserRepo.from_domain()
+      |> UserRepo.update_changeset(updated_items)
 
     case Repo.update(update_changeset) do
       {:ok, user} -> {:ok, UserRepo.to_domain(user, locale, auth)}

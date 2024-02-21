@@ -53,7 +53,7 @@ defmodule Member.Usecase.Register do
   defp error_handler(
          %Member.User.Authentication{email: conflict_email},
          %Member.User.Locale{},
-         %Ecto.Changeset{} = changeset
+         changeset
        ) do
     get_fields = fn l ->
       {field, _} = l
@@ -61,7 +61,7 @@ defmodule Member.Usecase.Register do
       field
     end
 
-    case changeset.errors |> Enum.map(get_fields) |> IO.inspect() do
+    case changeset.errors |> Enum.map(get_fields) do
       [:email] ->
         raise Register.EmailCollide, "#{:email} `#{conflict_email}` has already been taken"
 
@@ -75,7 +75,7 @@ defmodule Member.Usecase.Register do
   end
 end
 
-defmodule Member.Usecase.ModifyInfo do
+defmodule Member.Usecase.Modify do
   @moduledoc """
   修改用户的信息。
   """
@@ -91,48 +91,103 @@ defmodule Member.Usecase.ModifyInfo do
     %{repo: repo, locale: locale, auth: auth}
   end
 
+  @doc """
+  更新特定用户的信息的服务。
+
+  选项中的 `:locale` 与 `:auth` 为决定返回格式的布尔值。
+
+  - `{false, flase}` => 对 `%User{}` 领域模型的内容进行更新
+  - `{true,  false}` => 对特定用户的属地信息进行更新
+  - `{false,  true}` => 对特定用户的认证信息进行更新
+  """
   def update_service(%User{} = user, field, new_value, opts \\ []) do
     %{repo: repo, auth: auth, locale: locale} = parse_deps(opts)
 
-    {status, new_user_or_changeset} =
-      repo.update_user_info(user, %{field => new_value}, locale, auth)
+    do_update_service(user, %{field => new_value}, repo, locale, auth)
+  end
 
-    case status do
-      :ok -> new_user_or_changeset
-      :error -> raise new_user_or_changeset
+  defp do_update_service(%User{} = user, %{} = values, repo, locale, auth) do
+    repo.update_user_info(user, values, locale, auth)
+  end
+end
+
+defmodule Member.Usecase.ModifyUser do
+  @moduledoc """
+  修改用户信息的相关用例。
+
+  包括昵称、用户名以及信息。
+  """
+
+  alias Member.Usecase.Modify
+
+  def nickname(user, new_nickname, opts \\ []) do
+    case Modify.update_service(user, :nickname, new_nickname, Keyword.take(opts, [:repo])) do
+      {:ok, user} -> user
+      {:error, changeset} -> changeset
     end
   end
 
-  # 来自领域模型
-  def nickname(user, new_nickname, opts \\ []),
-    do: update_service(user, :nickname, new_nickname, opts)
+  # TODO: Wrap it.
+  def username(user, new_username, opts \\ []) do
+    case Modify.update_service(user, :username, new_username, Keyword.take(opts, [:repo])) do
+      {:ok, user} -> user
+      {:error, changeset} -> changeset
+    end
+  end
 
-  def username(user, new_username, opts \\ []),
-    do: update_service(user, :username, new_username, opts)
+  def info(user, new_info, opts \\ []) do
+    case Modify.update_service(user, :info, new_info, Keyword.take(opts, [:repo])) do
+      {:ok, user} -> user
+      {:error, changeset} -> changeset
+    end
+  end
 
-  def info(user, new_info, opts \\ []),
-    do: update_service(user, :info, new_info, opts)
+  defmodule Member.Usecase.ModifyUser.UsernameCollide do
+    # TODO
+  end
 end
 
 defmodule Member.Usecase.ModifyLocaleInfo do
   @moduledoc """
-  和 `Member.Usecase.ModifyInfo` 在应用层面不同，但是本质上是一样的。
+  和 `Member.Usecase.ModifyUser` 在应用层面不同，但是本质上是一样的。
   """
 
   alias Member.User
-  alias Member.Usecase.ModifyInfo
+  alias Member.Usecase.Modify
 
-  def timezone(%User{} = user, new_timezone, opts \\ []),
-    do: ModifyInfo.update_service(user, :timezone, new_timezone, [locale: true] ++ opts)
+  def timezone(%User{} = user, new_timezone, opts \\ []) do
+    case Modify.update_service(
+        user,
+        :timezone,
+        new_timezone,
+        [locale: true] ++ Keyword.take(opts, [:repo])
+      ) do
+        {:ok, user} -> user
+        {:error, changeset} -> changeset
+      end
+  end
 
-  def language(%User{} = user, new_language, opts \\ []),
-    do: ModifyInfo.update_service(user, :lang, new_language, [locale: true] ++ opts)
+  def language(%User{} = user, new_language, opts \\ []) do
+    case Modify.update_service(
+        user,
+        :lang,
+        new_language,
+        [locale: true] ++ Keyword.take(opts, [:repo])
+      ) do
+        {:ok, user} -> user
+        {:error, changeset} -> changeset
+    end
+  end
 end
 
 defmodule Member.Usecase.ModifySentitiveInfo do
   @moduledoc """
-  和 `Member.Usecase.ModifyInfo` 不同的是这些的信息是相对敏感的。
+  和 `Member.Usecase.Modify` 不同的是这些的信息是相对敏感的。
   """
+
+  # 密码
+
+  # 邮件
 end
 
 defmodule Member.Usecase.UpdateStatus do
