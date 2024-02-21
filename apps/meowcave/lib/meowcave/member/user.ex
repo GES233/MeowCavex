@@ -30,7 +30,7 @@ defmodule MeowCave.Member.UserRepo do
 
   ## Changeset
 
-  def changeset(user, attrs) do
+  def changeset(user, attrs \\ %{}) do
     user
     |> cast(attrs, [
       :username,
@@ -45,7 +45,7 @@ defmodule MeowCave.Member.UserRepo do
       :timezone,
       :lang
     ])
-    |> unique_constraint(:email)
+    |> unique_constraint([:email], message: "has already been taken")
     |> set_anomynous_nickname()
   end
 
@@ -54,11 +54,14 @@ defmodule MeowCave.Member.UserRepo do
 
     if is_nil(name) do
       put_change(changeset, :nickname, "Anomynous Member")
+    else
+      changeset
     end
   end
 
   ## Application related.
 
+  # DTO -> DAO
   def from_domain(%User.Authentication{} = auth_field, %User.Locale{} = locale) do
     %__MODULE__{
       username: nil,
@@ -74,14 +77,15 @@ defmodule MeowCave.Member.UserRepo do
     }
   end
 
+  # Domain -> DTO
   def from_domain(%User{} = user) do
     %__MODULE__{
       id: user.id,
       username: user.username,
       nickname: user.nickname,
-      status: user.status |> User.Status.value(),
-      gender: user.gender |> User.Gender.value(),
-      gender_visible: not (user.gender |> User.Gender.secret?()),
+      status: User.Status.value(user.status),
+      gender: User.Gender.value(user.gender),
+      gender_visible: not (User.Gender.secret?(user.gender)),
       join_at: user.join_at,
       info: user.info
     }

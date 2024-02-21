@@ -37,11 +37,10 @@ defmodule Member.Service.Register do
           Member.User.t()
   def create_blank_user(
         %MemberAuth{nickname: nickname} = _userauth,
-        %Locale{timezone: _timezone} = _locale
+        %Locale{timezone: _timezone, lang: _lang} = _locale,
+        current \\ DateTime.utc_now(:second)
       ) do
     # 时区信息应该来自 DTO 。
-
-    current = DateTime.utc_now()
 
     %User{
       id: nil,

@@ -46,10 +46,31 @@ defmodule Member.Usecase.Register do
         user_or_changeset
 
       :error ->
-        case user_or_changeset do
-          # TODO: 仔细看下 Ecto.insert 的错误格式
-          _ -> raise Register.EmailCollide, auth_field.email
-        end
+        error_handler(auth_field, locale_field, user_or_changeset)
+    end
+  end
+
+  defp error_handler(
+         %Member.User.Authentication{email: conflict_email},
+         %Member.User.Locale{},
+         %Ecto.Changeset{} = changeset
+       ) do
+    get_fields = fn l ->
+      {field, _} = l
+
+      field
+    end
+
+    case changeset.errors |> Enum.map(get_fields) |> IO.inspect() do
+      [:email] ->
+        raise Register.EmailCollide, "#{:email} `#{conflict_email}` has already been taken"
+
+      [:email, _] ->
+        raise Register.EmailCollide, "#{:email} `#{conflict_email}` has already been taken"
+
+      # Reserved
+      _ ->
+        nil
     end
   end
 end
@@ -85,8 +106,10 @@ defmodule Member.Usecase.ModifyInfo do
   # 来自领域模型
   def nickname(user, new_nickname, opts \\ []),
     do: update_service(user, :nickname, new_nickname, opts)
+
   def username(user, new_username, opts \\ []),
     do: update_service(user, :username, new_username, opts)
+
   def info(user, new_info, opts \\ []),
     do: update_service(user, :info, new_info, opts)
 end

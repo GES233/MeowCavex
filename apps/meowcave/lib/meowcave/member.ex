@@ -10,12 +10,17 @@ defmodule MeowCave.Member do
 
   @impl true
   def create(%User.Authentication{} = authentication_field, %User.Locale{} = locale_field) do
-    {status, user_or_changeset} =
+    user =
       UserRepo.from_domain(authentication_field, locale_field)
-      |> Repo.insert()
-    case status do
-      :ok -> {:ok, user_or_changeset |> UserRepo.to_domain()}
-      :error -> {:error, user_or_changeset}
+      |> UserRepo.changeset()
+
+    case Repo.insert(user, on_conflict: :raise) do
+      {:ok, user} ->
+        {:ok, UserRepo.to_domain(user)}
+
+      {:error, changeset} ->
+        {:error, changeset}
+        # Send it, and raise custom exception in usecase layer.
     end
   end
 
@@ -35,16 +40,12 @@ defmodule MeowCave.Member do
 
   @impl true
   def update_user_info(%User{} = targer_user, updated_items, locale, auth) do
-    changeset =
+    update_changeset =
       Ecto.Changeset.cast(UserRepo.from_domain(targer_user), updated_items, @valid_fields)
 
-    {status, user_or_changeset} =
-      changeset
-      |> Repo.update()
-
-    case status do
-      :ok -> {:ok, user_or_changeset |> UserRepo.to_domain(locale, auth)}
-      :error -> {:error, user_or_changeset}
+    case Repo.update(update_changeset) do
+      {:ok, user} -> {:ok, UserRepo.to_domain(user, locale, auth)}
+      {:error, changeset} -> {:error, changeset}
     end
   end
 
@@ -55,7 +56,7 @@ defmodule MeowCave.Member do
     if is_nil(user_or_nil) do
       nil
     else
-      user_or_nil |> UserRepo.to_domain()
+      UserRepo.to_domain(user_or_nil)
     end
   end
 end
