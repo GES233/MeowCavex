@@ -9,13 +9,13 @@ defmodule MeowCave.Repo.Migrations.CreateUsers do
       add :gender, :string
       add :gender_visible, :boolean, default: false, null: false
       add :info, :string
-      add :join_at, :utc_datetime
+      # add :join_at, :utc_datetime
       add :email, :string
       add :password, :string
       add :timezone, :string
       add :lang, :string
 
-      timestamps()
+      timestamps(inserted_at: :join_at)
     end
 
     create index(:users, :nickname)

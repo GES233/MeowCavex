@@ -13,11 +13,13 @@ defmodule MeowCave.Member.UserRepo do
     # from Member.User
     field :username, :string
     field :nickname, :string
-    field :status, Enum, values: [:normal, :deleted, :freeze, :blocked, :newbie]
-    field :gender, Enum, values: [:male, :female, :non_bisexual, :blank]
+    field :status, Enum, values: Member.User.Status.get_valid_values()
+    # [:normal, :deleted, :freeze, :blocked, :newbie]
+    field :gender, Enum, values: Member.User.Gender.get_valid_values()
+    # [:male, :female, :non_bisexual, :blank]
     field :gender_visible, :boolean, default: false
     field :info, :string
-    field :join_at, :utc_datetime
+    # field :join_at, :utc_datetime
     # from Member.User.Authentication
     field :email, :string
     field :password, :string, redact: true
@@ -25,7 +27,10 @@ defmodule MeowCave.Member.UserRepo do
     field :timezone, :string
     field :lang, :string
 
-    timestamps()
+    # timestamps/1 in here from
+    # https://hexdocs.pm/ecto/Ecto.Schema.html#timestamps/1
+    # 没法从配置改
+    timestamps(inserted_at: :join_at, type: :utc_datetime)
   end
 
   ## Changeset

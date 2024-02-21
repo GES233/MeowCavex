@@ -238,10 +238,16 @@ defmodule Member.User.Gender do
   """
   alias Member.User.Gender.GenderTooDiverseException
 
-  @type value :: atom()
+  @type value :: :male | :female | :non_bisexual | :blank
+
   @valid_values [:male, :female, :non_bisexual, :blank]
+
   @type t :: %__MODULE__{value: value(), hidden: boolean()}
+
   defstruct value: :blank, hidden: false
+
+  ## Helper used in schema defination
+  def get_valid_values(), do: @valid_values
 
   ## Inspect
 
@@ -373,7 +379,7 @@ defmodule Member.User.Gender do
     end
   end
 
-  defp get_valid_values, do: @valid_values
+  # defp get_valid_values, do: @valid_values
 
   defmodule GenderTooDiverseException do
     @moduledoc """

@@ -14,6 +14,10 @@ config :meowcave,
   namespace: MeowCave,
   ecto_repos: [MeowCave.Repo]
 
+# Configure the Repo
+config :meowcave, MeowCave.Repo, migration_timestamps:
+  [type: :utc_datetime]
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
