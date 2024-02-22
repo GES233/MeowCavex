@@ -79,9 +79,7 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 ## Application related
-config :meowcave_app, :default_ports,
-  user_repo: MeowCave.Member.UserRepo,
-  password_hash: MeowCave.Member.User.PassHash
+import_config "meow.exs"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

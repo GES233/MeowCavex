@@ -81,7 +81,7 @@ defmodule Member.Usecase.Modify do
   """
   alias Member.User
 
-  @default_repo MeowCave.Member
+  @default_repo Application.compile_env(:meowcave_app, [:default_ports, :user_repo], nil)
 
   defp parse_deps(opts) do
     {repo, opts} = Keyword.pop(opts, :repo, @default_repo)
