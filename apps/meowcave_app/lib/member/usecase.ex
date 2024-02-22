@@ -17,8 +17,8 @@ defmodule Member.Usecase.Register do
   alias Member.User
   alias Member.Service.Register
 
-  @default_repo MeowCave.Member
-  @default_hash MeowCave.Member.User.PassHash
+  @default_repo Application.compile_env(:meowcave_app, [:default_ports, :user_repo], nil)
+  @default_hash Application.compile_env(:meowcave_app, [:default_ports, :password_hash], nil)
 
   defp parse_deps(opts) do
     {repo, opts} = Keyword.pop(opts, :repo, @default_repo)
@@ -100,6 +100,9 @@ defmodule Member.Usecase.Modify do
   - `{true,  false}` => 对特定用户的属地信息进行更新
   - `{false,  true}` => 对特定用户的认证信息进行更新
   """
+  @spec update_service(User.t(), atom(), any(), keyword()) ::
+          {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
+          | {:error, any()}
   def update_service(%User{} = user, field, new_value, opts \\ []) do
     %{repo: repo, auth: auth, locale: locale} = parse_deps(opts)
 
@@ -115,11 +118,17 @@ defmodule Member.Usecase.Modify do
 
   用于用户主页的修改。
   """
+  @spec multiple_update_service(User.t(), map(), keyword()) ::
+          {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
+          | {:error, any()}
   def multiple_update_service(%User{} = user, values, opts \\ []) do
     %{repo: repo, auth: auth, locale: locale} = parse_deps(opts)
 
     do_update_service(user, values, repo, locale, auth)
   end
+
+  def error_handler(_changeset), do: nil
+  # TODO: convert changeset to fields.
 end
 
 defmodule Member.Usecase.ModifyUser do
@@ -131,6 +140,8 @@ defmodule Member.Usecase.ModifyUser do
 
   alias Member.Usecase.Modify
 
+  @spec nickname(Member.User.t(), String.t(), keyword()) ::
+          {:ok, Member.User.t()} | {:error, any()}
   def nickname(user, new_nickname, opts \\ []) do
     case Modify.update_service(user, :nickname, new_nickname, Keyword.take(opts, [:repo])) do
       {:ok, user} -> user
@@ -139,6 +150,8 @@ defmodule Member.Usecase.ModifyUser do
   end
 
   # TODO: Wrap it.
+  @spec username(Member.User.t(), String.t(), keyword()) ::
+          {:ok, Member.User.t()} | {:error, any()}
   def username(user, new_username, opts \\ []) do
     case Modify.update_service(user, :username, new_username, Keyword.take(opts, [:repo])) do
       {:ok, user} -> user
@@ -146,6 +159,8 @@ defmodule Member.Usecase.ModifyUser do
     end
   end
 
+  @spec info(Member.User.t(), String.t(), keyword()) ::
+          {:ok, Member.User.t()} | {:error, any()}
   def info(user, new_info, opts \\ []) do
     case Modify.update_service(user, :info, new_info, Keyword.take(opts, [:repo])) do
       {:ok, user} -> user
@@ -176,6 +191,8 @@ defmodule Member.Usecase.ModifyLocaleInfo do
   alias Member.User
   alias Member.Usecase.Modify
 
+  @spec timezone(User.t(), String.t() | charlist(), keyword()) ::
+          {:ok, Member.User.Locale.t()} | {:error, any()}
   def timezone(%User{} = user, new_timezone, opts \\ []) do
     case Modify.update_service(
            user,
@@ -188,6 +205,8 @@ defmodule Member.Usecase.ModifyLocaleInfo do
     end
   end
 
+  @spec language(User.t(), String.t() | charlist(), keyword()) ::
+          {:ok, Member.User.Locale.t()} | {:error, any()}
   def language(%User{} = user, new_language, opts \\ []) do
     case Modify.update_service(
            user,
@@ -205,10 +224,41 @@ defmodule Member.Usecase.ModifySentitiveInfo do
   @moduledoc """
   和 `Member.Usecase.Modify` 不同的是这些的信息是相对敏感的。
   """
+  alias Member.User
+  alias Member.Usecase.Modify
 
-  # 密码
+  @default_repo Application.compile_env(:meowcave_app, [:default_ports, :user_repo], nil)
+  @default_hash Application.compile_env(:meowcave_app, [:default_ports, :password_hash], nil)
 
-  # 邮件
+  defp parse_deps(opts) do
+    {repo, opts} = Keyword.pop(opts, :repo, @default_repo)
+    {pass_hash, _opts} = Keyword.pop(opts, :pass_hash, @default_hash)
+
+    %{repo: repo, pass_hash: pass_hash}
+  end
+
+  ## 密码
+
+  defp do_update_password(%User{} = user, new_password, opts) do
+    %{repo: repo, pass_hash: hashlib} = parse_deps(opts)
+
+    Modify.update_service(user, :password, hashlib.generate_hash(new_password), repo: repo)
+  end
+
+  # 通过命令
+  def update_password_in_shell(%User{} = user, new_password, opts \\ []),
+    do: do_update_password(user, new_password, opts)
+
+  # 通过邮件认证
+  def update_password_via_email(), do: nil
+
+  # 通过邀请树
+
+  ## 邮件
+
+  # 通过命令
+
+  # 通过邀请树
 end
 
 defmodule Member.Usecase.UpdateStatus do
