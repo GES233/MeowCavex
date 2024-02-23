@@ -3,17 +3,8 @@ defmodule Member.Usecase do
 end
 
 defmodule Member.Usecase.Register do
-  @moduledoc """
-  关于注册的用例。
+  @moduledoc false
 
-  ## Example
-
-      Member.Usecase.Register.call(..., repo: MeowCave.Member)
-
-  可能被抛出的错误：
-
-  * `Member.Service.EmailCollide` 邮件已经有用户注册了
-  """
   alias Member.User
   alias Member.Service.Register
 
@@ -27,6 +18,30 @@ defmodule Member.Usecase.Register do
     %{repo: repo, pass_hash: pass_hash}
   end
 
+  @doc """
+  添加用户。
+
+  ## Example
+
+      iex>Member.Usecase.Register.call("TinyCat", "nya@meowcave.moe", "123456")
+      %Member.User{
+        id: 1,
+        username: nil,
+        nickname: "TinyCat",
+        gender: %Member.User.Gender{value: :blank, hidden: false},
+        status: %Member.User.Status{value: :newbie},
+        info: nil,
+        join_at: ~U[2024-02-23 13:43:31Z]
+      }
+
+  可能被抛出的错误：
+
+  * `Member.Service.EmailCollide` 邮件已经有用户注册了（返回给用户）
+  * `Member.Service.UpdateLocale.LanguageNotInDatabase` 语言不合规（内部错误）
+  * `Member.Service.UpdateLocale.TimezoneNotInDatabase` 时区不合规（内部错误）
+
+  没有错误将会返回用户。
+  """
   @spec call(String.t(), String.t(), String.t(), charlist(), charlist(), keyword(module())) ::
           User.t()
   def call(nickname, email, password, lang \\ "zh-Hans", timezone \\ "Etc/UTC", opts \\ []) do
@@ -159,11 +174,14 @@ defmodule Member.Usecase.ModifyUser do
   alias Member.Usecase.ModifyUser.UsernameCollide
   alias Member.Usecase.Modify
 
+  @doc """
+  修改用户的昵称。
+  """
   @spec nickname(User.t(), String.t(), keyword()) :: User.t()
   def nickname(user, new_nickname, opts \\ []) do
     case Modify.update_service(user, :nickname, new_nickname, Keyword.take(opts, [:repo])) do
       {:ok, user} -> user
-      {:error, changeset} -> [unknown_err: changeset] |> IO.inspect()
+      {:error, changeset} -> [unknown_err: changeset]
     end
   end
 
@@ -178,8 +196,13 @@ defmodule Member.Usecase.ModifyUser do
 
       {:error, changeset} ->
         case Modify.get_error_field(changeset) do
-          [:username] -> raise UsernameCollide
-          _ -> [unknown_err: changeset] |> IO.inspect()
+          [:username] ->
+            IO.inspect(changeset)
+
+            raise UsernameCollide
+
+          _ ->
+            [unknown_err: changeset] |> IO.inspect()
         end
     end
   end
@@ -296,7 +319,8 @@ defmodule Member.Usecase.UpdateStatus do
   @doc """
   执行更新用户状态的操作。
 
-  其中 `new_status` 是 `Status` 中的合法操作。
+  其中 `new_status` 是 `Status` 中的合法操作，
+  否则会触发 `Member.Service.UpdateStatus.StatusOperationFailed` 。
   """
   def update_status(%User{} = user, new_status, opts \\ []) do
     new_status_from_domain = ServiceUpdate.update_status(user.status, new_status)
@@ -364,7 +388,15 @@ defmodule Member.Usecase.InviteUser do
   邀请用户。
   """
 
-  def invite_user_without_code(), do: nil
-  def invite_user_with_code(), do: nil
-  def invite_user_with_user(), do: nil
+  def create_code() do
+    # ...
+  end
+
+  def create_code_by_user(%Member.User{} = _user, _generate_pattern, _code_content) do
+    # ...
+  end
+
+  def with_code(%Member.User{} = _user, %Member.InviteCode{} = _complete_code) do
+    # ...
+  end
 end
