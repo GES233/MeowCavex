@@ -88,69 +88,51 @@ defmodule MeowCave.Member.UserRepo do
 
   # DTO -> DAO
   def from_domain(%User.Authentication{} = auth_field, %User.Locale{} = locale) do
-    %__MODULE__{
-      username: nil,
-      nickname: auth_field.nickname,
-      status: User.Status.create() |> User.Status.value(),
-      gender: User.Gender.create() |> User.Gender.value(),
-      gender_visible: not (User.Gender.create() |> User.Gender.secret?()),
-      join_at: DateTime.utc_now(:second),
-      email: auth_field.email,
-      password: auth_field.hashed_password,
-      timezone: locale.timezone,
-      lang: locale.lang
+    %{
+      struct(
+        MeowCave.Member.UserRepo,
+        Map.merge(Map.from_struct(auth_field), Map.from_struct(locale))
+      )
+      | password: auth_field.hashed_password,
+        status: User.Status.create() |> User.Status.value(),
+        gender: User.Gender.create() |> User.Gender.value(),
+        gender_visible: not (User.Gender.create() |> User.Gender.secret?()),
+        join_at: DateTime.utc_now(:second)
     }
   end
 
   # Domain -> DTO
   def from_domain(%User{} = user) do
-    %__MODULE__{
-      id: user.id,
-      username: user.username,
-      nickname: user.nickname,
-      status: User.Status.value(user.status),
-      gender: User.Gender.value(user.gender),
-      gender_visible: not User.Gender.secret?(user.gender),
-      join_at: user.join_at,
-      info: user.info
+    %{
+      struct(MeowCave.Member.UserRepo, Map.from_struct(user))
+      | status: User.Status.value(user.status),
+        gender: User.Gender.value(user.gender),
+        gender_visible: not User.Gender.secret?(user.gender)
     }
   end
 
   def to_domain(%__MODULE__{} = dao, locale \\ false, auth \\ false) do
     case {locale, auth} do
       {false, false} ->
-        %User{
-          id: dao.id,
-          username: dao.username,
-          nickname: dao.nickname,
-          gender: %User.Gender{
-            value: dao.gender,
-            hidden: not dao.gender_visible
-          },
-          status: %User.Status{
-            value: dao.status
-          },
-          info: dao.info,
-          join_at: dao.join_at
+        %{
+          struct(Member.User, Map.from_struct(dao))
+          | gender: %User.Gender{
+              value: dao.gender,
+              hidden: not dao.gender_visible
+            },
+            status: %User.Status{
+              value: dao.status
+            }
         }
 
       {true, false} ->
-        %User.Locale{
-          id: dao.id,
-          lang: dao.lang,
-          timezone: dao.timezone
-        }
+        struct(User.Locale, Map.from_struct(dao))
 
       {false, true} ->
-        %User.Authentication{
-          id: dao.id,
-          nickname: dao.nickname,
-          email: dao.email,
-          hashed_password: dao.password
+        %{
+          struct(User.Authentication, Map.from_struct(dao))
+          | hashed_password: dao.password
         }
-
-      {true, true} ->
-        nil
     end
   end
 end
