@@ -148,6 +148,6 @@ defmodule Member.Service.UpdateGender do
     end
   end
 
-  def hide_gender(), do: nil
-  def expose_gender(), do: nil
+  def hide_gender(%Gender{} = old_gender), do: Gender.hide(old_gender)
+  def expose_gender(%Gender{} = old_gender), do: Gender.expose(old_gender)
 end

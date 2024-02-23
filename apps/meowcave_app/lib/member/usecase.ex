@@ -332,7 +332,7 @@ defmodule Member.Usecase.UpdateGender do
       [:gender] -> nil
       [:gender_visible] -> nil
       [:gender, :gender_visible] -> nil
-      _ -> raise unknown_error: changeset
+      _ -> [unknown_error: changeset]
     end
   end
 
@@ -352,8 +352,11 @@ defmodule Member.Usecase.UpdateGender do
     do_update_gender(user, UpdateGender.update_gender(user.gender, new_gender), opts)
   end
 
-  def hide_gender(), do: nil
-  def expose_gender(), do: nil
+  def hide_gender(user, opts \\ []),
+    do: do_update_gender(user, UpdateGender.hide_gender(user.gender), opts)
+
+  def expose_gender(user, opts \\ []),
+    do: do_update_gender(user, UpdateGender.expose_gender(user.gender), opts)
 end
 
 defmodule Member.Usecase.InviteUser do
