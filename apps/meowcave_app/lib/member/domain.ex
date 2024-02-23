@@ -443,18 +443,33 @@ defmodule Member.User.Repo do
   """
   @callback create(Member.User.Authentication.t(), Member.User.Locale.t()) ::
               {:ok, Member.User.t()} | {:error, any()}
-  # 不是纯函数，可能需要加上时间戳，
-  # 但是 `id` 也是不可知的。
 
+  @doc """
+  更新用户的信息（除了性别）。
+
+  ~~说实话我其实也想把状态单独弄出来~~
+  """
   @callback update_user_info(Member.User.t(), map(), boolean(), boolean()) ::
               {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
               | {:error, any()}
 
+  @doc """
+  更新用户的性别。
+
+  包括 `Gender` 的两类：值与是否公开。
+  """
   @callback update_user_gender(Member.User.t(), Member.User.Gender.t()) ::
               {:ok, Member.User.t()}
               | {:error, any()}
 
+  @doc """
+  按照 id 返回用户。
+  """
   @callback get_user_by_id(pos_integer()) :: Member.User.t() | nil
+
+  # TODO:
+  # @callback get_user_numbers()
+  #           :: {:ok, %{atom() => non_neg_integer()}} | {:error, any()}
 end
 
 defmodule Member.Invite do
@@ -464,28 +479,91 @@ defmodule Member.Invite do
   """
 
   @type t :: %__MODULE__{
-          host_id: Member.User.id_type(),
-          guest_id: Member.User.id_type(),
+          host_id: Member.User.id_type() | nil,
+          guest_id: Member.User.id_type() | nil,
           invite_at: DateTime.t()
         }
 
   # 用 `User.id_type` 还是 `User.t` 值得讨论下。
   defstruct [:host_id, :guest_id, :invite_at]
+
+  def user_invite?(%__MODULE__{} = invite),
+    do: not is_nil(invite.host_id)
+
+  def host(%__MODULE__{} = invite),
+    do: invite.host_id
+end
+
+defmodule Member.InviteCode do
+  @type code :: String.t() | charlist()
+  @type t :: %__MODULE__{
+          code: code(),
+          status: Member.InviteCode.Status.t(),
+          create_at: DateTime.t()
+        }
+  defstruct [:code, :status, :valid_period, :create_at]
+end
+
+defmodule Member.InviteCode.Status do
+  use Status, [:normal, :expire, :used, none: :default]
+
+  ## Inspect.
+  @spec enable?(Member.InviteCode.Status.t()) :: boolean()
+  def enable?(status), do: under(status, :normal)
 end
 
 defmodule Member.Invite.Repo do
   @moduledoc false
 
-  @callback append_invitation_code(Member.User.t(), String.t() | charlist(), DateTime.t()) ::
+  @doc """
+  添加邀请码。
+  """
+  @callback append_invitation_code(Member.User.t(), Member.InviteCode.code(), DateTime.t()) ::
               {:ok | :error, any()}
 
-  @callback verify_invitation_code(String.t()) :: boolean()
+  @doc """
+  检查邀请码，并返回其信息。
+  """
+  @callback check_invitation_code(Member.InviteCode.code()) ::
+              {:ok, Member.InviteCode.t()} | {:not_found, nil} | {:error, any()}
 
+  @doc """
+  实现邀请。
+
+  在更新人物外别忘了更新邀请码的状态。
+  """
   @callback append_invite(Member.User.t(), Member.User.t()) :: Member.Invite.t()
 
+  @doc """
+  确认某两个人之间是否存在邀请关系。
+  """
   @callback verify_invite(Member.User.t(), Member.User.t()) :: {:ok, boolean()} | {:error, any()}
 
-  @callback get_host(Member.User.t()) :: {:ok, Member.User.t() | nil} | {:error, any()}
+  @doc """
+  返回所有的邀请人。
 
-  @callback get_guests(Member.User.t()) :: {:ok, list(Member.User.t()) | nil} | {:error, any()}
+  非负数 `depth` 为深度，如果是 0 返回到某个从石头蹦出来的人为止。
+  """
+  @callback get_host(Member.User.t(), depth :: non_neg_integer()) ::
+              {:ok, [Member.User.t()]} | {:not_found, []} | {:error, any()}
+
+  @doc """
+  返回所有又此人邀请的人。
+
+  非负数 `depth` 为深度，如果是 0 则返回到没有再邀请新人的萌新为止。
+  """
+  @callback get_guests(Member.User.t(), depth :: non_neg_integer()) ::
+              {:ok, %{integer() => [Member.User.t()]}} | {:not_found, []} | {:error, any()}
+
+  @doc """
+  返回某用户最新的邀请码（）。
+  """
+  @callback get_last_invite_code(Member.User.t()) ::
+              {:ok, Member.InviteCode.t()} | {:not_found, nil} | {:error, any()}
+
+  @doc """
+  返回某用户所有的邀请码。
+  """
+  @callback get_invite_code(Member.User.t()) ::
+              {:ok, [Member.InviteCode.t()]} | {:not_found, nil} | {:error, any()}
 end
