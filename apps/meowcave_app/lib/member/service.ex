@@ -82,6 +82,12 @@ defmodule Member.Service.UpdateLocale do
 
   def update_lang(%Locale{} = locale, lang), do: %Locale{locale | lang: lang}
   def update_timezone(%Locale{} = locale, timezone), do: %Locale{locale | timezone: timezone}
+
+  defmodule TimezoneNotInDatabase do
+  end
+
+  defmodule LanguageNotInDatabase do
+  end
 end
 
 defmodule Member.Service.UpdateStatus do
