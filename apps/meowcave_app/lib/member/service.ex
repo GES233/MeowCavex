@@ -97,13 +97,15 @@ defmodule Member.Service.UpdateStatus do
     if new_status not in Status.get_opt_list() do
       raise UpdateStatus.StatusOperationFailed, new_status
     end
+
     new_status_from_service = apply(Status, new_status, [old_status])
 
     cond do
-      new_status_from_service == Status.operate_when_not_match(new_status) ->
+      new_status_from_service == Status.operate_when_not_match(old_status) ->
         raise UpdateStatus.StatusInvalid, new_status
 
-      true -> new_status_from_service
+      true ->
+        new_status_from_service
     end
   end
 

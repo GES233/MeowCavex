@@ -28,13 +28,18 @@ defmodule MeowCave.Member do
     update_changeset =
       targer_user
       |> UserRepo.from_domain()
-      |> UserRepo.update_changeset(updated_items)
+      |> UserRepo.update_changeset(updated_items |> update_if_status)
 
     case Repo.update(update_changeset) do
       {:ok, user} -> {:ok, UserRepo.to_domain(user, locale, auth)}
       {:error, changeset} -> {:error, changeset}
     end
   end
+
+  defp update_if_status(%{status: %User.Status{} = status} = items),
+    do: %{items | status: User.Status.value(status)}
+
+  defp update_if_status(item), do: item
 
   @impl true
   def update_user_gender(%User{} = user, %User.Gender{} = new_gender) do

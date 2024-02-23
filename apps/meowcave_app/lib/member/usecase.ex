@@ -53,7 +53,7 @@ defmodule Member.Usecase.Register do
   @doc """
   返回 Ecto.Changeset 中出错的列。
   """
-  def get_error_field(%Ecto.Changeset{} = changeset) do
+  def get_error_field(changeset) do
     get_fields = fn l ->
       {field, _} = l
 
@@ -137,7 +137,7 @@ defmodule Member.Usecase.Modify do
   @doc """
   返回 Ecto.Changeset 中出错的列。
   """
-  def get_error_field(%Ecto.Changeset{} = changeset) do
+  def get_error_field(changeset) do
     get_fields = fn l ->
       {field, _} = l
 
@@ -163,7 +163,7 @@ defmodule Member.Usecase.ModifyUser do
   def nickname(user, new_nickname, opts \\ []) do
     case Modify.update_service(user, :nickname, new_nickname, Keyword.take(opts, [:repo])) do
       {:ok, user} -> user
-      {:error, changeset} -> raise unknown_err: changeset
+      {:error, changeset} -> [unknown_err: changeset] |> IO.inspect()
     end
   end
 
@@ -179,7 +179,7 @@ defmodule Member.Usecase.ModifyUser do
       {:error, changeset} ->
         case Modify.get_error_field(changeset) do
           [:username] -> raise UsernameCollide
-          _ -> raise unknown_err: changeset
+          _ -> [unknown_err: changeset] |> IO.inspect()
         end
     end
   end
@@ -188,7 +188,7 @@ defmodule Member.Usecase.ModifyUser do
   def info(user, new_info, opts \\ []) do
     case Modify.update_service(user, :info, new_info, Keyword.take(opts, [:repo])) do
       {:ok, user} -> user
-      {:error, changeset} -> raise unknown_err: changeset
+      {:error, changeset} -> [unknown_err: changeset] |> IO.inspect()
     end
   end
 
@@ -225,7 +225,7 @@ defmodule Member.Usecase.ModifyLocaleInfo do
            [locale: true] ++ Keyword.take(opts, [:repo])
          ) do
       {:ok, user} -> user
-      {:error, changeset} -> raise unknown_err: changeset
+      {:error, changeset} -> [unknown_err: changeset] |> IO.inspect()
     end
   end
 
@@ -238,7 +238,7 @@ defmodule Member.Usecase.ModifyLocaleInfo do
            [locale: true] ++ Keyword.take(opts, [:repo])
          ) do
       {:ok, user} -> user
-      {:error, changeset} -> raise unknown_err: changeset
+      {:error, changeset} -> [unknown_err: changeset] |> IO.inspect()
     end
   end
 end
@@ -265,7 +265,10 @@ defmodule Member.Usecase.ModifySentitiveInfo do
   defp do_update_password(%User{} = user, new_password, opts) do
     %{repo: repo, pass_hash: hashlib} = parse_opts(opts)
 
-    Modify.update_service(user, :password, hashlib.generate_hash(new_password), repo: repo)
+    Modify.update_service(user, :password, hashlib.generate_hash(new_password),
+      repo: repo,
+      auth: true
+    )
   end
 
   # 通过命令、邮件或邀请树
@@ -286,7 +289,7 @@ defmodule Member.Usecase.UpdateStatus do
 
   alias Member.User
   alias Member.Usecase.Modify
-  alias Member.Service.UpdateStatus
+  alias Member.Service.UpdateStatus, as: ServiceUpdate
 
   @status :status
 
@@ -296,7 +299,7 @@ defmodule Member.Usecase.UpdateStatus do
   其中 `new_status` 是 `Status` 中的合法操作。
   """
   def update_status(%User{} = user, new_status, opts \\ []) do
-    new_status_from_domain = UpdateStatus.update_status(user.status, new_status)
+    new_status_from_domain = ServiceUpdate.update_status(user.status, new_status)
 
     case Modify.update_service(
            user,
@@ -305,7 +308,7 @@ defmodule Member.Usecase.UpdateStatus do
            Keyword.take(opts, [:repo])
          ) do
       {:ok, user} -> user
-      {:error, changeset} -> raise unknown_err: changeset
+      {:error, changeset} -> [unknown_err: changeset]
     end
   end
 end
