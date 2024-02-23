@@ -8,6 +8,8 @@ defmodule MeowCave.Member do
   @behaviour Member.User.Repo
   # 我很高兴一个模块可以继承多个行为
 
+  # # TODO: refrac with Ecto.Changeset.traverse_errors/2
+
   @impl true
   def create(%User.Authentication{} = authentication_field, %User.Locale{} = locale_field) do
     user =
@@ -66,5 +68,50 @@ defmodule MeowCave.Member do
     else
       UserRepo.to_domain(user_or_nil)
     end
+  end
+
+  # 我有预感这玩意会写的又臭又长（
+  ## 关于邀请
+  @behaviour Member.Invite.Repo
+  alias Member.{Invite, InviteCode}
+
+  @impl true
+  def append_invitation_code(%User{} = _user, %InviteCode{} = _code, _timestep) do
+    {:ok, nil}
+  end
+
+  @impl true
+  def check_invitation_code(%InviteCode{} = _code) do
+    {:ok, nil}
+  end
+
+  @impl true
+  def append_invite(%User{} = _host, %User{} = _guest) do
+    %Invite{}
+  end
+
+  @impl true
+  def verify_invite(%User{} = _host, %User{} = _guest) do
+    {:ok, true}
+  end
+
+  @impl true
+  def get_host(%User{} = _user, _depth \\ 0) do
+    {:ok, %{1 => [], 2 => []}}
+  end
+
+  @impl true
+  def get_guests(%User{} = _user, _depth \\ 0) do
+    {:ok, %{1 => [], 2 => []}}
+  end
+
+  @impl true
+  def get_last_invite_code(%User{} = _user) do
+    {:ok, %InviteCode{}}
+  end
+
+  @impl true
+  def get_invite_code(%User{} = _user) do
+    {:ok, %InviteCode{}}
   end
 end
