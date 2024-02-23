@@ -57,11 +57,25 @@ defmodule MeowCave.Member.UserRepo do
     cast(user, attrs, [:gender, :gender_visible])
   end
 
-  def create_user_changeset(user, attrs \\ %{}) do
+  def create_user_changeset(user, attrs \\ %{}, _opts \\ []) do
+    # TODO: parse opts
+
     user
     |> changeset_prelude(attrs)
     |> unique_constraint([:email], message: "has already been taken")
+    # |> validate_email()
     |> set_anomynous_nickname()
+  end
+
+  def validate_email(changeset) do
+    changeset
+    |> validate_format(:email, ~r"")
+  end
+
+  def validate_username(changeset) do
+    changeset
+    |> unique_constraint([:username], message: "has already been taken")
+    |> validate_format(:username, ~r"")
   end
 
   def set_anomynous_nickname(changeset) do
@@ -91,7 +105,7 @@ defmodule MeowCave.Member.UserRepo do
     %{
       struct(
         MeowCave.Member.UserRepo,
-        Map.merge(Map.from_struct(auth_field), Map.from_struct(locale))
+        Map.from_struct(auth_field) |> Map.merge(Map.from_struct(locale))
       )
       | password: auth_field.hashed_password,
         status: User.Status.create() |> User.Status.value(),
