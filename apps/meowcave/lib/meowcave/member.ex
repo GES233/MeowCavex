@@ -37,6 +37,22 @@ defmodule MeowCave.Member do
   end
 
   @impl true
+  def update_user_gender(%User{} = user, %User.Gender{} = new_gender) do
+    changeset =
+      user
+      |> UserRepo.from_domain()
+      |> UserRepo.update_gender_changeset(%{
+        gender: new_gender.value,
+        gender_visible: not new_gender.hidden
+      })
+
+    case Repo.update(changeset) do
+      {:ok, user} -> {:ok, UserRepo.to_domain(user, false, false)}
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  @impl true
   def get_user_by_id(id) do
     user_or_nil = MeowCave.Repo.get(UserRepo, id)
 

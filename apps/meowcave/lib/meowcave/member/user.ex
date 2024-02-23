@@ -53,6 +53,10 @@ defmodule MeowCave.Member.UserRepo do
 
   defp changeset_prelude(%Ecto.Changeset{} = changeset, _attrs), do: changeset
 
+  defp changeset_update_gender(%__MODULE__{} = user, attrs) do
+    cast(user, attrs, [:gender, :gender_visible])
+  end
+
   def create_user_changeset(user, attrs \\ %{}) do
     user
     |> changeset_prelude(attrs)
@@ -73,6 +77,11 @@ defmodule MeowCave.Member.UserRepo do
   def update_changeset(user, updated_items) do
     user
     |> changeset_prelude(updated_items)
+  end
+
+  def update_gender_changeset(user, gender_or_visibility) do
+    user
+    |> changeset_update_gender(gender_or_visibility)
   end
 
   ## Application related.

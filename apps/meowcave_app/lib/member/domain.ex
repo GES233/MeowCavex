@@ -227,6 +227,8 @@ defmodule Member.User.Status do
       _ -> %__MODULE__{value: :blocked}
     end
   end
+
+  # TODO: Add return normal.
 end
 
 defmodule Member.User.Gender do
@@ -390,7 +392,7 @@ defmodule Member.User.Gender do
     @impl true
     def exception(new_gender) do
       msg =
-        "The genders you entered(#{inspect(new_gender)}) are so diverse that sites can't correspond."
+        "The genders you entered(#{new_gender}) are so diverse that sites can't correspond."
 
       %GenderTooDiverseException{message: msg}
     end
@@ -446,6 +448,10 @@ defmodule Member.User.Repo do
 
   @callback update_user_info(Member.User.t(), map(), boolean(), boolean()) ::
               {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
+              | {:error, any()}
+
+  @callback update_user_gender(Member.User.t(), Member.User.Gender.t()) ::
+              {:ok, Member.User.t()}
               | {:error, any()}
 
   @callback get_user_by_id(pos_integer()) :: Member.User.t() | nil

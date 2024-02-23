@@ -55,7 +55,7 @@ defmodule Status do
 
       def get_default_value(), do: unquote(opts[:default])
 
-      def value(%__MODULE__{value: value} = _status), do: value
+      def value(%__MODULE__{value: value}), do: value
 
       def valid?(status), do: value(status) in get_valid_values()
 
