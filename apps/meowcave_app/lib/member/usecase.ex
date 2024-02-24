@@ -47,8 +47,13 @@ defmodule Member.Usecase.Register do
   def call(nickname, email, password, lang \\ "zh-Hans", timezone \\ "Etc/UTC", opts \\ []) do
     %{repo: repo, pass_hash: hashlib} = parse_opts(opts)
 
+    # 将来会引入验证的业务，
+    # 相关数据库的包名也会被引入
     locale_field = Register.create_locale(lang, timezone)
 
+    # 提一嘴邮件的验证逻辑：
+    # 【只需要检查邮件地址是否正确即可】
+    # 联网需要考虑到论坛是否被假设在局域网上
     auth_field = %{
       Register.create_auth(nickname, email, password)
       | hashed_password: hashlib.generate_hash(password)
@@ -62,6 +67,7 @@ defmodule Member.Usecase.Register do
 
       :error ->
         error_handler(auth_field, locale_field, user_or_changeset)
+        # 对于异常可能需要修改，因为这个错误需要被 rescue 然后返回给用户
     end
   end
 
@@ -92,7 +98,7 @@ defmodule Member.Usecase.Register do
 
       # Reserved
       _ ->
-        raise unknown_error: changeset
+        [unknown_error: changeset]
     end
   end
 end
@@ -107,6 +113,8 @@ defmodule Member.Usecase.Modify do
 
   defp parse_opts(opts) do
     {repo, opts} = Keyword.pop(opts, :repo, @default_repo)
+    # `locale` 和 `auth` 是决定返回格式的，
+    # 后期会修改
     {locale, opts} = Keyword.pop(opts, :locale, false)
     {auth, _opts} = Keyword.pop(opts, :auth, false)
 
@@ -176,6 +184,8 @@ defmodule Member.Usecase.ModifyUser do
 
   @doc """
   修改用户的昵称。
+
+  不大可能会返回什么错误，除非有引入审查的机制。
   """
   @spec nickname(User.t(), String.t(), keyword()) :: User.t()
   def nickname(user, new_nickname, opts \\ []) do
@@ -248,12 +258,13 @@ defmodule Member.Usecase.ModifyLocaleInfo do
            [locale: true] ++ Keyword.take(opts, [:repo])
          ) do
       {:ok, user} -> user
-      {:error, changeset} -> [unknown_err: changeset] |> IO.inspect()
+      {:error, changeset} -> [unknown_err: changeset]
     end
   end
 
   @spec language(User.t(), String.t() | charlist(), keyword()) :: User.Locale.t()
   def language(%User{} = user, new_language, opts \\ []) do
+    # 语言数据库的检查也要加
     case Modify.update_service(
            user,
            :lang,
@@ -261,7 +272,7 @@ defmodule Member.Usecase.ModifyLocaleInfo do
            [locale: true] ++ Keyword.take(opts, [:repo])
          ) do
       {:ok, user} -> user
-      {:error, changeset} -> [unknown_err: changeset] |> IO.inspect()
+      {:error, changeset} -> [unknown_err: changeset]
     end
   end
 end
@@ -295,14 +306,17 @@ defmodule Member.Usecase.ModifySentitiveInfo do
   end
 
   # 通过命令、邮件或邀请树
-  def update_password_in_shell(%User{} = user, new_password, opts \\ []),
+  def update_password(%User{} = user, new_password, opts \\ []),
     do: do_update_password(user, new_password, opts)
 
   ## 邮件
 
   # 通过命令
+  def update_email_in_shell(%User{} = _user, _new_email, _opts \\ []), do: nil
 
   # 通过邀请树
+  # 这个机制可能存在争议，暂不落实。
+  def update_email_via_host(%User{} = _host, %User{} = _guest, _opts \\ []), do: nil
 end
 
 defmodule Member.Usecase.UpdateStatus do
@@ -372,6 +386,7 @@ defmodule Member.Usecase.UpdateGender do
     end
   end
 
+  @spec update_gender(User.t(), atom(), keyword()) :: User.t()
   def update_gender(user, new_gender, opts \\ []) do
     do_update_gender(user, UpdateGender.update_gender(user.gender, new_gender), opts)
   end

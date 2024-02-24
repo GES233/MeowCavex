@@ -11,13 +11,18 @@ msgstr ""
 "Language: zh_Hans\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: lib/meowcave_web/components/core_components.ex:482
+#: lib/meowcave_web/components/core_components.ex:491
 #, elixir-autogen, elixir-format
 msgid "Actions"
-msgstr ""
+msgstr "启动"
 
 #: lib/meowcave_web/components/core_components.ex:76
-#: lib/meowcave_web/components/core_components.ex:130
+#: lib/meowcave_web/components/core_components.ex:132
 #, elixir-autogen, elixir-format
 msgid "close"
-msgstr ""
+msgstr "关闭"
+
+#: lib/meowcave_web/components/layouts/plain/root.html.heex:8
+#, elixir-autogen, elixir-format
+msgid "Explore bigger world."
+msgstr "探索更大的世界"

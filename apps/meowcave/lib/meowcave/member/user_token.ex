@@ -5,13 +5,14 @@ defmodule MeowCave.Member.UserTokenRepo do
   # @rand_size 32
 
   # 密码重置令牌的过期时间不能太长，否则其他人可能会通过此渠道来登录账号。
+  # ？？？
   # @session_validity_in_days 60
 
   schema "user_tokens" do
     field :token, :binary
-    # TODO: update with Ecto.Enum
     field :context, :map
     field :scope, :string
+    field :type, Ecto.Enum, values: Account.TokenType.get_type_list()
     field :sent_to, :string
     belongs_to :users, MeowCave.Member.UserRepo
 

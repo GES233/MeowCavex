@@ -414,6 +414,8 @@ defmodule Member.User.Locale do
   defstruct [:id, :lang, :timezone]
 end
 
+# defmodule Member.User.LocaleRepo do end
+
 defmodule Member.User.Authentication do
   @moduledoc """
   说白了就两个使用场景：
@@ -434,6 +436,7 @@ defmodule Member.User.Authentication do
   @enforce_keys [:nickname, :email]
   defstruct [:id, :nickname, :email, :password, :hashed_password]
 
+  # 可能与 `Account` 业务有交互。
   def has_id?(%__MODULE__{} = authn), do: authn.id != nil
 end
 
@@ -452,6 +455,11 @@ defmodule Member.User.Repo do
   @callback update_user_info(Member.User.t(), map(), boolean(), boolean()) ::
               {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
               | {:error, any()}
+
+  # @callback update_user_profile((Member.User.t(), map()) :: {:ok, Member.User.t()} | {:error, any()}
+  # @callback update_user_status((Member.User.t(), new_status :: Member.User.Status.t()) :: {:ok, Member.User.t()} | {:error, any()}
+  # @callback update_user_locale(Member.User.t(), map()) :: {:ok, Member.User.Locale.t()}| {:error, any()}
+  # @callback update_user_auth(Member.User.t(), map()) :: {:ok, Member.User.Authentication.t()}| {:error, any()}
 
   @doc """
   更新用户的性别。

@@ -8,7 +8,7 @@ defmodule MeowCave.Member do
   @behaviour Member.User.Repo
   # 我很高兴一个模块可以继承多个行为
 
-  # # TODO: refrac with Ecto.Changeset.traverse_errors/2
+  # TODO: refrac with Ecto.Changeset.traverse_errors/2
 
   @impl true
   def create(%User.Authentication{} = authentication_field, %User.Locale{} = locale_field) do

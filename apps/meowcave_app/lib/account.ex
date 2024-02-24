@@ -34,6 +34,8 @@ defmodule Account.TokenType do
     refresh_token: 60
   }
 
+  def get_type_list(), do: [:session, :token, :refresh_token]
+
   def get_expire_time(create_time, token_type),
     do: DateTime.add(create_time, @expire_time[token_type], :day)
 end
@@ -68,4 +70,8 @@ defmodule Account.SessionValidate do
   # @session_type :session
 
   def call(), do: nil
+end
+
+defmodule Account.GiveSession do
+  #
 end

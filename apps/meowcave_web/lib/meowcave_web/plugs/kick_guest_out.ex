@@ -24,15 +24,15 @@ defmodule MeowCaveWeb.KickGuestOut do
   @spec call(Plug.Conn.t(), any()) :: Plug.Conn.t()
   def call(conn, _opts) do
     conn.assigns.current_user
-    |> not_user?()
+    |> is_member?()
     |> maybe_halt(conn)
   end
 
-  defp not_user?(_user), do: true
+  defp is_member?(_user), do: true
 
-  defp maybe_halt(true, conn) do
+  defp maybe_halt(true, conn), do: conn
+
+  defp maybe_halt(false, conn) do
     conn
   end
-
-  defp maybe_halt(false, conn), do: conn
 end

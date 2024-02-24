@@ -1,6 +1,6 @@
 defmodule MeowCaveWeb.Accounts.UserAuth do
   @moduledoc """
-  逐行抄袭了 `phz.gen.auth` 的内容，但是选择了领域模型。
+  逐行抄袭了 `phx.gen.auth` 的内容，但是选择了领域模型。
   """
   use MeowCaveWeb, :verified_routes
 

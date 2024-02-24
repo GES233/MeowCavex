@@ -5,7 +5,6 @@ defmodule MeowCave.Member.UserRepo do
 
   use Ecto.Schema
   import Ecto.Changeset
-  alias Ecto.Enum
 
   alias Member.User
 
@@ -13,13 +12,10 @@ defmodule MeowCave.Member.UserRepo do
     # from Member.User
     field :username, :string
     field :nickname, :string
-    field :status, Enum, values: Member.User.Status.get_valid_values()
-    # [:normal, :deleted, :freeze, :blocked, :newbie]
-    field :gender, Enum, values: Member.User.Gender.get_valid_values()
-    # [:male, :female, :non_bisexual, :blank]
+    field :status, Ecto.Enum, values: Member.User.Status.get_valid_values()
+    field :gender, Ecto.Enum, values: Member.User.Gender.get_valid_values()
     field :gender_visible, :boolean, default: false
     field :info, :string
-    # field :join_at, :utc_datetime
     # from Member.User.Authentication
     field :email, :string
     field :password, :string, redact: true

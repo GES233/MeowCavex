@@ -1,4 +1,4 @@
-defmodule UserTest do
+defmodule UserApplicationTest do
   use ExUnit.Case
   # doctest Member.User
 
@@ -164,5 +164,13 @@ defmodule UserTest do
     {:ok, updated_gender} =
       updated_info
       |> User.update(:gender, :female)
+
+    assert {:ok, %User{info: ""} = user_removed_info} =
+      updated_gender
+      |> User.remove_info(:info)
+
+    assert {:ok, %User{nickname: ""}} =
+      user_removed_info
+      |> User.remove_info(:nickname)
   end
 end

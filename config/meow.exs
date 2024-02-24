@@ -6,3 +6,5 @@ config :meowcave_app, :default_ports,
   password_hash: MeowCave.Member.User.PassHash
 
 ## TODO: set enable to use email.
+
+## TODO: set strategies to kick guests out.

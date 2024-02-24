@@ -30,10 +30,10 @@ msgid "has an invalid entry"
 msgstr "存在不合法的入口"
 
 msgid "is reserved"
-msgstr ""
+msgstr "被保留"
 
 msgid "does not match confirmation"
-msgstr ""
+msgstr "和确认不一致"
 
 msgid "is still associated with this entry"
 msgstr ""
@@ -75,19 +75,19 @@ msgstr[0] ""
 
 msgid "should be at most %{count} byte(s)"
 msgid_plural "should be at most %{count} byte(s)"
-msgstr[0] ""
+msgstr[0] "最多应该 %{count} 字节"
 
 msgid "must be less than %{number}"
-msgstr ""
+msgstr "必须小于 %{number}"
 
 msgid "must be greater than %{number}"
-msgstr ""
+msgstr "必须大于 %{number}"
 
 msgid "must be less than or equal to %{number}"
-msgstr ""
+msgstr "必须小于等于 %{number}"
 
 msgid "must be greater than or equal to %{number}"
-msgstr ""
+msgstr "必须大于等于 %{number}"
 
 msgid "must be equal to %{number}"
-msgstr ""
+msgstr "必须等于 %{number}"

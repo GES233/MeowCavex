@@ -146,6 +146,7 @@ defmodule MeowCaveWeb.CoreComponents do
   attr :flash, :map, required: true, doc: "the map of flash messages"
   attr :id, :string, default: "flash-group", doc: "the optional id of flash container"
 
+  # TODO: 加上 Gettext
   def flash_group(assigns) do
     ~H"""
     <div id={@id}>
@@ -610,6 +611,9 @@ defmodule MeowCaveWeb.CoreComponents do
 
   ## JS Commands
 
+  # TODO: 我要不要等写点东西？
+  # 但我也不会啊。
+
   def show(js \\ %JS{}, selector) do
     JS.show(js,
       to: selector,
@@ -656,7 +660,7 @@ defmodule MeowCaveWeb.CoreComponents do
   end
 
   @doc """
-  Translates an error message using gettext.
+  通过 gettext 翻译错误信息。
   """
   def translate_error({msg, opts}) do
     # When using gettext, we typically pass the strings we want
@@ -677,7 +681,7 @@ defmodule MeowCaveWeb.CoreComponents do
   end
 
   @doc """
-  Translates the errors for a field from a keyword list of errors.
+  将从某错误的关键字列表中翻译给定 field 对应的错误。
   """
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
@@ -728,6 +732,9 @@ defmodule MeowCaveWeb.CoreComponents do
     end
   end
 
+  @doc """
+  辅助 naive_title 进行场景检查的一个函数。
+  """
   def check_title(assigns) do
     cond do
       assigns[:page_title] -> :content

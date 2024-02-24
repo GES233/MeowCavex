@@ -11,13 +11,18 @@
 msgid ""
 msgstr ""
 
-#: lib/meowcave_web/components/core_components.ex:482
+#: lib/meowcave_web/components/core_components.ex:491
 #, elixir-autogen, elixir-format
 msgid "Actions"
 msgstr ""
 
 #: lib/meowcave_web/components/core_components.ex:76
-#: lib/meowcave_web/components/core_components.ex:130
+#: lib/meowcave_web/components/core_components.ex:132
 #, elixir-autogen, elixir-format
 msgid "close"
+msgstr ""
+
+#: lib/meowcave_web/components/layouts/plain/root.html.heex:8
+#, elixir-autogen, elixir-format
+msgid "Explore bigger world."
 msgstr ""

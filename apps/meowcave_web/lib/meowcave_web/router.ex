@@ -27,6 +27,7 @@ defmodule MeowCaveWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  # 我其实是想让不用的情况走不同的 pipeline
   pipeline :guest do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -38,6 +39,7 @@ defmodule MeowCaveWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    # 加上鉴权相关
   end
 
   scope "/", MeowCaveWeb do
