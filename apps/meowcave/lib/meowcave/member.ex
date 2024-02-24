@@ -16,9 +16,9 @@ defmodule MeowCave.Member do
       UserRepo.from_domain(authentication_field, locale_field)
       |> UserRepo.create_user_changeset()
 
-    case Repo.insert(user, on_conflict: :raise) do
+    case Repo.insert(user) do
       {:ok, user} ->
-        {:ok, UserRepo.to_domain(user)}
+        {:ok, UserRepo.to_user(user)}
 
       {:error, changeset} ->
         {:error, changeset}
@@ -30,7 +30,7 @@ defmodule MeowCave.Member do
     update_changeset =
       targer_user
       |> UserRepo.from_domain()
-      |> UserRepo.update_changeset(updated_items |> update_if_status)
+      |> UserRepo.update_changeset(updated_items)
 
     case Repo.update(update_changeset) do
       {:ok, user} -> {:ok, UserRepo.to_domain(user, locale, auth)}
@@ -38,10 +38,27 @@ defmodule MeowCave.Member do
     end
   end
 
-  defp update_if_status(%{status: %User.Status{} = status} = items),
-    do: %{items | status: User.Status.value(status)}
+  @impl true
+  def update_user_profile(%User{} = targer_user, updated_values) do
+    validated_values = Member.User.Repo.profile_validation(updated_values)
 
-  defp update_if_status(item), do: item
+    changeset =
+      targer_user
+      |> UserRepo.from_domain()
+      |> UserRepo.update_changeset(validated_values)
+
+    update_user_changeset(changeset)
+  end
+
+  @impl true
+  def update_user_status(%User{} = user, %User.Status{} = new_status) do
+    changeset =
+      user
+      |> UserRepo.from_domain()
+      |> UserRepo.update_changeset(%{status: User.Status.value(new_status)})
+
+    update_user_changeset(changeset)
+  end
 
   @impl true
   def update_user_gender(%User{} = user, %User.Gender{} = new_gender) do
@@ -53,21 +70,23 @@ defmodule MeowCave.Member do
         gender_visible: not new_gender.hidden
       })
 
+    update_user_changeset(changeset)
+  end
+
+  defp update_user_changeset(changeset) do
     case Repo.update(changeset) do
-      {:ok, user} -> {:ok, UserRepo.to_domain(user, false, false)}
-      {:error, changeset} -> {:error, changeset}
+      {:ok, user} -> {:ok, UserRepo.to_user(user)}
+      {:error, changeset} -> {:error, handle_user_err_changeset(changeset)}
     end
   end
+
+  defp handle_user_err_changeset(chg), do: chg
 
   @impl true
   def get_user_by_id(id) do
     user_or_nil = MeowCave.Repo.get(UserRepo, id)
 
-    if is_nil(user_or_nil) do
-      nil
-    else
-      UserRepo.to_domain(user_or_nil)
-    end
+    UserRepo.to_user(user_or_nil)
   end
 
   # 我有预感这玩意会写的又臭又长（

@@ -23,10 +23,8 @@ defmodule MeowCave.Member.UserRepo do
     field :timezone, :string
     field :lang, :string
     # Association with MeowCave.Member.InviteRepo
-    has_many :guests, MeowCave.Member.InviteRepo,
-      [foreign_key: :guest_id]
-    has_one :host, MeowCave.Member.InviteRepo,
-      [foreign_key: :host_id]
+    has_many :guests, MeowCave.Member.InviteRepo, foreign_key: :guest_id
+    has_one :host, MeowCave.Member.InviteRepo, foreign_key: :host_id
 
     # timestamps/1 in here from
     # https://hexdocs.pm/ecto/Ecto.Schema.html#timestamps/1
@@ -149,6 +147,32 @@ defmodule MeowCave.Member.UserRepo do
           | hashed_password: dao.password
         }
     end
+  end
+
+  def to_user(%__MODULE__{} = dao) do
+    %{
+      struct(Member.User, Map.from_struct(dao))
+      | gender: %User.Gender{
+          value: dao.gender,
+          hidden: not dao.gender_visible
+        },
+        status: %User.Status{
+          value: dao.status
+        }
+    }
+  end
+
+  def to_user(nil), do: nil
+
+  def to_locale(%__MODULE__{} = dao) do
+    struct(User.Locale, Map.from_struct(dao))
+  end
+
+  def to_auth(%__MODULE__{} = dao) do
+    %{
+      struct(User.Authentication, Map.from_struct(dao))
+      | hashed_password: dao.password
+    }
   end
 end
 

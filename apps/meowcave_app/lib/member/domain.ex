@@ -456,8 +456,21 @@ defmodule Member.User.Repo do
               {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
               | {:error, any()}
 
-  # @callback update_user_profile((Member.User.t(), map()) :: {:ok, Member.User.t()} | {:error, any()}
-  # @callback update_user_status((Member.User.t(), new_status :: Member.User.Status.t()) :: {:ok, Member.User.t()} | {:error, any()}
+  @callback update_user_profile(Member.User.t(), map()) :: {:ok, Member.User.t()} | {:error, any()}
+
+  @doc """
+  用在 update_user_profile/2 的工具函数。
+  """
+  def profile_validation(values) do
+    # 检查 `updated_values` 的值。
+    values
+    |> Enum.reject(fn _ -> false end)
+    # 键是否在合理的范围内。
+    # 包括用户名、昵称、介绍
+  end
+
+  @callback update_user_status(Member.User.t(), new_status :: Member.User.Status.t()) :: {:ok, Member.User.t()} | {:error, any()}
+
   # @callback update_user_locale(Member.User.t(), map()) :: {:ok, Member.User.Locale.t()}| {:error, any()}
   # @callback update_user_auth(Member.User.t(), map()) :: {:ok, Member.User.Authentication.t()}| {:error, any()}
 

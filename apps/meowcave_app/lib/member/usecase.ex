@@ -171,6 +171,30 @@ defmodule Member.Usecase.Modify do
   end
 end
 
+defmodule Member.Usecase.UpdateCommon do
+  @default_repo Application.compile_env(:meowcave_app, [:default_ports, :user_repo], nil)
+
+  def parse_opts(opts) do
+    {repo, _opts} = Keyword.pop(opts, :repo, @default_repo)
+
+    %{repo: repo}
+  end
+
+
+  @doc """
+  返回 Ecto.Changeset 中出错的列。
+  """
+  def get_error_field(changeset) do
+    get_fields = fn l ->
+      {field, _} = l
+
+      field
+    end
+
+    changeset.errors |> Enum.map(get_fields)
+  end
+end
+
 defmodule Member.Usecase.ModifyUser do
   @moduledoc """
   修改用户信息的相关用例。
@@ -325,10 +349,8 @@ defmodule Member.Usecase.UpdateStatus do
   """
 
   alias Member.User
-  alias Member.Usecase.Modify
+  alias Member.Usecase.UpdateCommon
   alias Member.Service.UpdateStatus, as: ServiceUpdate
-
-  @status :status
 
   @doc """
   执行更新用户状态的操作。
@@ -337,14 +359,11 @@ defmodule Member.Usecase.UpdateStatus do
   否则会触发 `Member.Service.UpdateStatus.StatusOperationFailed` 。
   """
   def update_status(%User{} = user, new_status, opts \\ []) do
+    %{repo: repo} = UpdateCommon.parse_opts(opts)
+
     new_status_from_domain = ServiceUpdate.update_status(user.status, new_status)
 
-    case Modify.update_service(
-           user,
-           @status,
-           new_status_from_domain,
-           Keyword.take(opts, [:repo])
-         ) do
+    case repo.update_user_status(user, new_status_from_domain) do
       {:ok, user} -> user
       {:error, changeset} -> [unknown_err: changeset]
     end
@@ -355,18 +374,10 @@ defmodule Member.Usecase.UpdateGender do
   alias Member.User
   alias Member.User.Gender
   alias Member.Service.UpdateGender
-  alias Member.Usecase.Modify
-
-  @default_repo Application.compile_env(:meowcave_app, [:default_ports, :user_repo], nil)
-
-  defp parse_opts(opts) do
-    {repo, _opts} = Keyword.pop(opts, :repo, @default_repo)
-
-    %{repo: repo}
-  end
+  alias Member.Usecase.UpdateCommon
 
   defp handle_gender_changset_err(changeset) do
-    case Modify.get_error_field(changeset) do
+    case UpdateCommon.get_error_field(changeset) do
       [:gender] -> nil
       [:gender_visible] -> nil
       [:gender, :gender_visible] -> nil
@@ -375,7 +386,7 @@ defmodule Member.Usecase.UpdateGender do
   end
 
   defp do_update_gender(%User{} = user, %Gender{} = new_gender, opts) do
-    %{repo: repo} = parse_opts(opts)
+    %{repo: repo} = UpdateCommon.parse_opts(opts)
 
     case repo.update_user_gender(user, new_gender) do
       {:ok, user} ->
