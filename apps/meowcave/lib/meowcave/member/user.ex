@@ -22,6 +22,11 @@ defmodule MeowCave.Member.UserRepo do
     # from Member.User.Locale
     field :timezone, :string
     field :lang, :string
+    # Association with MeowCave.Member.InviteRepo
+    has_many :guests, MeowCave.Member.InviteRepo,
+      [foreign_key: :guest_id]
+    has_one :host, MeowCave.Member.InviteRepo,
+      [foreign_key: :host_id]
 
     # timestamps/1 in here from
     # https://hexdocs.pm/ecto/Ecto.Schema.html#timestamps/1

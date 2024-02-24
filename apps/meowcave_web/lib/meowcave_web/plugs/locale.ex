@@ -1,4 +1,4 @@
-defmodule MeowcaveWeb.Plugs.Locale do
+defmodule MeowCaveWeb.Plugs.Locale do
   @moduledoc """
   关于本地化（包括语言和时区）。
 

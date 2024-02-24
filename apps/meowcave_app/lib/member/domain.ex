@@ -489,7 +489,7 @@ defmodule Member.Invite do
   @type t :: %__MODULE__{
           host_id: Member.User.id_type() | nil,
           guest_id: Member.User.id_type() | nil,
-          invite_at: DateTime.t()
+          invite_at: DateTime.t() | nil,
         }
 
   # 用 `User.id_type` 还是 `User.t` 值得讨论下。
@@ -500,6 +500,9 @@ defmodule Member.Invite do
 
   def host(%__MODULE__{} = invite),
     do: invite.host_id
+
+  def invited?(%__MODULE__{} = invite),
+    do: not is_nil(invite.guest_id)
 end
 
 defmodule Member.InviteCode do
