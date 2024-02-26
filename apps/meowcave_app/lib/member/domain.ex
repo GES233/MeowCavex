@@ -456,23 +456,34 @@ defmodule Member.User.Repo do
               {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
               | {:error, any()}
 
-  @callback update_user_profile(Member.User.t(), map()) :: {:ok, Member.User.t()} | {:error, any()}
+  @callback update_user_profile(Member.User.t(), map()) ::
+              {:ok, Member.User.t()} | {:error, any()}
+
+  @valid_profile_field [
+    :username,
+    :nickname,
+    :info
+  ]
 
   @doc """
   用在 update_user_profile/2 的工具函数。
+
+  检查 `updated_values` 的值。
   """
   def profile_validation(values) do
-    # 检查 `updated_values` 的值。
     values
-    |> Enum.reject(fn _ -> false end)
-    # 键是否在合理的范围内。
-    # 包括用户名、昵称、介绍
+    |> Enum.reject(fn {k, _} -> k not in @valid_profile_field end)
+    |> Enum.into(%{})
   end
 
-  @callback update_user_status(Member.User.t(), new_status :: Member.User.Status.t()) :: {:ok, Member.User.t()} | {:error, any()}
+  @callback update_user_status(Member.User.t(), new_status :: Member.User.Status.t()) ::
+              {:ok, Member.User.t()} | {:error, any()}
 
-  # @callback update_user_locale(Member.User.t(), map()) :: {:ok, Member.User.Locale.t()}| {:error, any()}
-  # @callback update_user_auth(Member.User.t(), map()) :: {:ok, Member.User.Authentication.t()}| {:error, any()}
+  @callback update_user_locale(Member.User.t(), map()) ::
+              {:ok, Member.User.Locale.t()} | {:error, any()}
+
+  @callback update_user_auth(Member.User.t(), map()) ::
+              {:ok, Member.User.Authentication.t()} | {:error, any()}
 
   @doc """
   更新用户的性别。
@@ -502,7 +513,7 @@ defmodule Member.Invite do
   @type t :: %__MODULE__{
           host_id: Member.User.id_type() | nil,
           guest_id: Member.User.id_type() | nil,
-          invite_at: DateTime.t() | nil,
+          invite_at: DateTime.t() | nil
         }
 
   # 用 `User.id_type` 还是 `User.t` 值得讨论下。

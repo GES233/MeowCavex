@@ -67,6 +67,7 @@ defmodule Member.Usecase.Register do
 
       :error ->
         error_handler(auth_field, locale_field, user_or_changeset)
+
         # 对于异常可能需要修改，因为这个错误需要被 rescue 然后返回给用户
     end
   end
@@ -103,74 +104,6 @@ defmodule Member.Usecase.Register do
   end
 end
 
-defmodule Member.Usecase.Modify do
-  @moduledoc """
-  修改用户的信息。
-  """
-  alias Member.User
-
-  @default_repo Application.compile_env(:meowcave_app, [:default_ports, :user_repo], nil)
-
-  defp parse_opts(opts) do
-    {repo, opts} = Keyword.pop(opts, :repo, @default_repo)
-    # `locale` 和 `auth` 是决定返回格式的，
-    # 后期会修改
-    {locale, opts} = Keyword.pop(opts, :locale, false)
-    {auth, _opts} = Keyword.pop(opts, :auth, false)
-
-    %{repo: repo, locale: locale, auth: auth}
-  end
-
-  @doc """
-  更新特定用户的信息的服务。
-
-  选项中的 `:locale` 与 `:auth` 为决定返回格式的布尔值。
-
-  - `{false, flase}` => 对 `%User{}` 领域模型的内容进行更新
-  - `{true,  false}` => 对特定用户的属地信息进行更新
-  - `{false,  true}` => 对特定用户的认证信息进行更新
-  """
-  @spec update_service(User.t(), atom(), any(), keyword()) ::
-          {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
-          | {:error, any()}
-  def update_service(%User{} = user, field, new_value, opts \\ []) do
-    %{repo: repo, auth: auth, locale: locale} = parse_opts(opts)
-
-    do_update_service(user, %{field => new_value}, repo, locale, auth)
-  end
-
-  defp do_update_service(%User{} = user, %{} = values, repo, locale, auth) do
-    repo.update_user_info(user, values, locale, auth)
-  end
-
-  @doc """
-  批量更改。
-
-  用于用户主页的修改。
-  """
-  @spec multiple_update_service(User.t(), map(), keyword()) ::
-          {:ok, Member.User.t() | Member.User.Authentication.t() | Member.User.Locale.t()}
-          | {:error, any()}
-  def multiple_update_service(%User{} = user, values, opts \\ []) do
-    %{repo: repo, auth: auth, locale: locale} = parse_opts(opts)
-
-    do_update_service(user, values, repo, locale, auth)
-  end
-
-  @doc """
-  返回 Ecto.Changeset 中出错的列。
-  """
-  def get_error_field(changeset) do
-    get_fields = fn l ->
-      {field, _} = l
-
-      field
-    end
-
-    changeset.errors |> Enum.map(get_fields)
-  end
-end
-
 defmodule Member.Usecase.UpdateCommon do
   @default_repo Application.compile_env(:meowcave_app, [:default_ports, :user_repo], nil)
 
@@ -180,7 +113,6 @@ defmodule Member.Usecase.UpdateCommon do
     %{repo: repo}
   end
 
-
   @doc """
   返回 Ecto.Changeset 中出错的列。
   """
@@ -195,59 +127,44 @@ defmodule Member.Usecase.UpdateCommon do
   end
 end
 
-defmodule Member.Usecase.ModifyUser do
-  @moduledoc """
-  修改用户信息的相关用例。
-
-  包括昵称、用户名以及信息。
-  """
-
+defmodule Member.Usecase.ModifyProfile do
   alias Member.User
-  alias Member.Usecase.ModifyUser.UsernameCollide
-  alias Member.Usecase.Modify
+  alias Member.Usecase.{UpdateCommon, ModifyProfile}
 
-  @doc """
-  修改用户的昵称。
+  def nickname(%User{} = user, new_nickname, opts \\ []) do
+    %{repo: repo} = UpdateCommon.parse_opts(opts)
 
-  不大可能会返回什么错误，除非有引入审查的机制。
-  """
-  @spec nickname(User.t(), String.t(), keyword()) :: User.t()
-  def nickname(user, new_nickname, opts \\ []) do
-    case Modify.update_service(user, :nickname, new_nickname, Keyword.take(opts, [:repo])) do
+    case repo.update_user_profile(user, %{nickname: new_nickname}) do
       {:ok, user} -> user
-      {:error, changeset} -> [unknown_err: changeset]
     end
   end
 
-  # TODO: Wrap it.
-  @spec username(User.t(), String.t(), keyword()) :: User.t()
-  def username(user, new_username, opts \\ []) do
-    # 添加查找设置（允许修改 username / 修改时限）
-    # 添加计时的业务逻辑
-    case Modify.update_service(user, :username, new_username, Keyword.take(opts, [:repo])) do
+  def username(%User{} = user, new_username, opts \\ []) do
+    %{repo: repo} = UpdateCommon.parse_opts(opts)
+
+    case repo.update_user_profile(user, %{username: new_username}) do
       {:ok, user} ->
         user
 
       {:error, changeset} ->
-        case Modify.get_error_field(changeset) do
+        case UpdateCommon.get_error_field(changeset) do
           [:username] ->
             IO.inspect(changeset)
 
-            raise UsernameCollide
-
-          _ ->
-            [unknown_err: changeset] |> IO.inspect()
+            raise ModifyProfile.UsernameCollide
         end
     end
   end
 
-  @spec info(User.t(), String.t(), keyword()) :: User.t()
-  def info(user, new_info, opts \\ []) do
-    case Modify.update_service(user, :info, new_info, Keyword.take(opts, [:repo])) do
+  def info(%User{} = user, new_info, opts \\ []) do
+    %{repo: repo} = UpdateCommon.parse_opts(opts)
+
+    case repo.update_user_profile(user, %{info: new_info}) do
       {:ok, user} -> user
-      {:error, changeset} -> [unknown_err: changeset] |> IO.inspect()
     end
   end
+
+  def username_collide(_changeset), do: true
 
   defmodule UsernameCollide do
     defexception [:message]
@@ -270,16 +187,16 @@ defmodule Member.Usecase.ModifyLocaleInfo do
   """
 
   alias Member.User
-  alias Member.Usecase.Modify
+  alias Member.Usecase.UpdateCommon
 
   @spec timezone(User.t(), String.t() | charlist(), keyword()) :: User.Locale.t()
   def timezone(%User{} = user, new_timezone, opts \\ []) do
+    %{repo: repo} = UpdateCommon.parse_opts(opts)
+
     # TODO: 添加时区数据库的检查
-    case Modify.update_service(
+    case repo.update_user_locale(
            user,
-           :timezone,
-           new_timezone,
-           [locale: true] ++ Keyword.take(opts, [:repo])
+           %User.Locale{timezone: new_timezone}
          ) do
       {:ok, user} -> user
       {:error, changeset} -> [unknown_err: changeset]
@@ -289,11 +206,11 @@ defmodule Member.Usecase.ModifyLocaleInfo do
   @spec language(User.t(), String.t() | charlist(), keyword()) :: User.Locale.t()
   def language(%User{} = user, new_language, opts \\ []) do
     # 语言数据库的检查也要加
-    case Modify.update_service(
+    %{repo: repo} = UpdateCommon.parse_opts(opts)
+
+    case repo.update_user_locale(
            user,
-           :lang,
-           new_language,
-           [locale: true] ++ Keyword.take(opts, [:repo])
+           %User.Locale{lang: new_language}
          ) do
       {:ok, user} -> user
       {:error, changeset} -> [unknown_err: changeset]
@@ -306,7 +223,6 @@ defmodule Member.Usecase.ModifySentitiveInfo do
   和 `Member.Usecase.Modify` 不同的是这些的信息是相对敏感的。
   """
   alias Member.User
-  alias Member.Usecase.Modify
 
   @default_repo Application.compile_env(:meowcave_app, [:default_ports, :user_repo], nil)
   @default_hash Application.compile_env(:meowcave_app, [:default_ports, :password_hash], nil)
@@ -323,10 +239,7 @@ defmodule Member.Usecase.ModifySentitiveInfo do
   defp do_update_password(%User{} = user, new_password, opts) do
     %{repo: repo, pass_hash: hashlib} = parse_opts(opts)
 
-    Modify.update_service(user, :password, hashlib.generate_hash(new_password),
-      repo: repo,
-      auth: true
-    )
+    repo.update_user_auth(user, :password, hashlib.generate_hash(new_password))
   end
 
   # 通过命令、邮件或邀请树

@@ -166,11 +166,11 @@ defmodule UserApplicationTest do
       |> User.update(:gender, :female)
 
     assert {:ok, %User{info: ""} = user_removed_info} =
-      updated_gender
-      |> User.remove_info(:info)
+             updated_gender
+             |> User.remove_info(:info)
 
     assert {:ok, %User{nickname: ""}} =
-      user_removed_info
-      |> User.remove_info(:nickname)
+             user_removed_info
+             |> User.remove_info(:nickname)
   end
 end

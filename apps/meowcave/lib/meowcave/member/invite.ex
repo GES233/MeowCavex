@@ -33,13 +33,17 @@ defmodule MeowCave.Member.InviteRepo do
 
   def to_relationship(%__MODULE__{} = dao) do
     # 如果领域模型改成用户也好操作。
-    code_activate = case guest = guest_or_nil(dao) do
-      %User{} ->
-        %User{join_at: join_at} = guest
+    code_activate =
+      case guest = guest_or_nil(dao) do
+        %User{} ->
+          %User{join_at: join_at} = guest
 
-        join_at
-      nil -> nil
-    end
+          join_at
+
+        nil ->
+          nil
+      end
+
     %{
       struct(Invite, Map.from_struct(dao))
       | invite_at: code_activate

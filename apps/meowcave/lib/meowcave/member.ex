@@ -42,40 +42,64 @@ defmodule MeowCave.Member do
   def update_user_profile(%User{} = targer_user, updated_values) do
     validated_values = Member.User.Repo.profile_validation(updated_values)
 
-    changeset =
-      targer_user
-      |> UserRepo.from_domain()
-      |> UserRepo.update_changeset(validated_values)
-
-    update_user_changeset(changeset)
+    targer_user
+    |> UserRepo.from_domain()
+    |> UserRepo.update_changeset(validated_values)
+    |> update_user_changeset()
   end
 
   @impl true
   def update_user_status(%User{} = user, %User.Status{} = new_status) do
-    changeset =
-      user
-      |> UserRepo.from_domain()
-      |> UserRepo.update_changeset(%{status: User.Status.value(new_status)})
-
-    update_user_changeset(changeset)
+    user
+    |> UserRepo.from_domain()
+    |> UserRepo.update_changeset(%{status: User.Status.value(new_status)})
+    |> update_user_changeset()
   end
 
   @impl true
   def update_user_gender(%User{} = user, %User.Gender{} = new_gender) do
-    changeset =
-      user
-      |> UserRepo.from_domain()
-      |> UserRepo.update_gender_changeset(%{
-        gender: new_gender.value,
-        gender_visible: not new_gender.hidden
-      })
+    user
+    |> UserRepo.from_domain()
+    |> UserRepo.update_gender_changeset(%{
+      gender: new_gender.value,
+      gender_visible: not new_gender.hidden
+    })
+    |> update_user_changeset()
+  end
 
-    update_user_changeset(changeset)
+  @impl true
+  def update_user_locale(%User{} = user, %User.Locale{} = locale) do
+    user
+    |> UserRepo.from_domain()
+    |> UserRepo.update_changeset(Map.from_struct(locale))
+    |> update_locale_changeset()
+  end
+
+  @impl true
+  def update_user_auth(%User{} = user, %User.Authentication{} = auth) do
+    user
+    |> UserRepo.from_domain()
+    |> UserRepo.update_changeset(Map.from_struct(auth))
+    |> update_auth_changeset()
   end
 
   defp update_user_changeset(changeset) do
     case Repo.update(changeset) do
       {:ok, user} -> {:ok, UserRepo.to_user(user)}
+      {:error, changeset} -> {:error, handle_user_err_changeset(changeset)}
+    end
+  end
+
+  defp update_locale_changeset(changeset) do
+    case Repo.update(changeset) do
+      {:ok, user} -> {:ok, UserRepo.to_locale(user)}
+      {:error, changeset} -> {:error, handle_user_err_changeset(changeset)}
+    end
+  end
+
+  defp update_auth_changeset(changeset) do
+    case Repo.update(changeset) do
+      {:ok, user} -> {:ok, UserRepo.to_auth(user)}
       {:error, changeset} -> {:error, handle_user_err_changeset(changeset)}
     end
   end
