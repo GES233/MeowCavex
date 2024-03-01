@@ -15,7 +15,7 @@ defmodule Member.User do
 
   import Status
   alias Member.User.ContentInvalidError
-  alias Member.User.{Gender}
+  alias Member.User.{Gender, Status}
   alias Member.User.FieldInvalidError
 
   @type id_type :: integer()
@@ -26,10 +26,9 @@ defmodule Member.User do
           nickname: String.t(),
           gender: Gender.t(),
           status: Status.t(),
-          # Use value when DTO.
-          # timezone: charlist(),
           info: String.t(),
           join_at: DateTime.t()
+          # locale: Member.User.Locale.t()
         }
   defstruct [
     :id,
@@ -37,9 +36,9 @@ defmodule Member.User do
     :nickname,
     :gender,
     :status,
-    # :timezone,
     :info,
     :join_at
+    # :locale
   ]
 
   @spec update!(Member.User.t(), atom(), any()) :: Member.User.t()
@@ -74,6 +73,7 @@ defmodule Member.User do
     case field do
       :gender -> {:ok, Map.replace(user, :gender, content)}
       :status -> {:ok, Map.replace(user, :status, content)}
+      # :locale -> {:ok, Map.replace(user, :locale, content)}
       _ -> {:error, :field_invalid}
     end
   end
@@ -527,6 +527,9 @@ defmodule Member.Invite do
 
   def invited?(%__MODULE__{} = invite),
     do: not is_nil(invite.guest_id)
+
+  def guest(%__MODULE__{} = invite),
+    do: invite.guest_id
 end
 
 defmodule Member.InviteCode do
@@ -534,6 +537,7 @@ defmodule Member.InviteCode do
   @type t :: %__MODULE__{
           code: code(),
           status: Member.InviteCode.Status.t(),
+          valid_period: Time.t(),
           create_at: DateTime.t()
         }
   defstruct [:code, :status, :valid_period, :create_at]
@@ -543,6 +547,8 @@ defmodule Member.InviteCode.Status do
   use Status, [:normal, :expire, :used, none: :default]
 
   ## Inspect.
+  def valid_status(), do: [:normal, :expire, :used]
+
   @spec enable?(Member.InviteCode.Status.t()) :: boolean()
   def enable?(status), do: under(status, :normal)
 end

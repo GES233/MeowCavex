@@ -7,7 +7,7 @@ defmodule MeowCave.Member.InviteRepo do
 
   schema "invite" do
     field :code, :string
-    field :status, Enum, values: [:normal]
+    field :status, Enum, values: Member.InviteCode.Status.valid_status()
     field :create_at, :utc_datetime
     field :expire, :time
     # 这块需要讨论下
@@ -51,6 +51,7 @@ defmodule MeowCave.Member.InviteRepo do
   end
 
   # 用于查用对应用户的工具函数
+  # 反正在 Repo 里随便用
   def host_or_nil(%__MODULE__{}), do: %User{}
   def guest_or_nil(%__MODULE__{}), do: %User{}
 end
