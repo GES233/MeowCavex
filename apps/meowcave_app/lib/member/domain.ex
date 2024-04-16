@@ -504,7 +504,7 @@ defmodule Member.User.Repo do
   #           :: {:ok, %{atom() => non_neg_integer()}} | {:error, any()}
 end
 
-defmodule Member.Invite do
+defmodule Member.InviteRelation do
   @moduledoc """
   关于成员间的邀请关系，其将在很多场合被使用（
   例如邀请注册、惩罚的连坐、无法使用邮件的情况下的密码验证）。
@@ -573,7 +573,7 @@ defmodule Member.Invite.Repo do
 
   在更新人物外别忘了更新邀请码的状态。
   """
-  @callback append_invite(Member.User.t(), Member.User.t()) :: Member.Invite.t()
+  @callback append_invite(Member.User.t(), Member.User.t()) :: Member.InviteRelation.t()
 
   @doc """
   确认某两个人之间是否存在邀请关系。

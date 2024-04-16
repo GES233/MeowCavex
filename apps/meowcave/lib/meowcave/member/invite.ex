@@ -2,7 +2,7 @@ defmodule MeowCave.Member.InviteRepo do
   use Ecto.Schema
   # import Ecto.Changeset
   alias Ecto.Enum
-  alias Member.{User, Invite, InviteCode}
+  alias Member.{User, InviteRelation, InviteCode}
   alias MeowCave.Member.{UserRepo, InviteRepo}
 
   schema "invite" do
@@ -45,7 +45,7 @@ defmodule MeowCave.Member.InviteRepo do
       end
 
     %{
-      struct(Invite, Map.from_struct(dao))
+      struct(InviteRelation, Map.from_struct(dao))
       | invite_at: code_activate
     }
   end

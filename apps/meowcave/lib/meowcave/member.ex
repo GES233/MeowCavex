@@ -116,7 +116,7 @@ defmodule MeowCave.Member do
   # 我有预感这玩意会写的又臭又长（
   ## 关于邀请
   @behaviour Member.Invite.Repo
-  alias Member.{Invite, InviteCode}
+  alias Member.{InviteRelation, InviteCode}
 
   @impl true
   def append_invitation_code(%User{} = _user, %InviteCode{} = _code, _timestep) do
@@ -130,7 +130,7 @@ defmodule MeowCave.Member do
 
   @impl true
   def append_invite(%User{} = _host, %User{} = _guest) do
-    %Invite{}
+    %InviteRelation{}
   end
 
   @impl true
