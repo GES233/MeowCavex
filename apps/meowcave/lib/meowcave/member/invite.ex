@@ -40,8 +40,9 @@ defmodule MeowCave.Member.InviteRepo do
 
           join_at
 
-        nil ->
-          nil
+        # Avoid warning,
+        # if the function completed, remove the comment.
+        # nil -> nil
       end
 
     %{

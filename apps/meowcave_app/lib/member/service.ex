@@ -5,8 +5,8 @@ defmodule Member.Service do
 end
 
 defmodule Member.Service.Password do
-  @callback generate_hash(String.t()) :: charlist()
-  @callback verify_pswd(String.t(), charlist()) :: boolean()
+  @callback generate_hash(binary()) :: binary()
+  @callback verify_pswd(binary(), binary()) :: boolean()
 end
 
 defmodule Member.Service.Register do

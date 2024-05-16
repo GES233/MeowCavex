@@ -115,45 +115,45 @@ defmodule MeowCave.Member do
 
   # 我有预感这玩意会写的又臭又长（
   ## 关于邀请
-  @behaviour Member.Invite.Repo
+  # @behaviour Member.Invite.Repo
   alias Member.{Invite, InviteCode}
 
-  @impl true
+  # @impl true
   def append_invitation_code(%User{} = _user, %InviteCode{} = _code, _timestep) do
     {:ok, nil}
   end
 
-  @impl true
+  # @impl true
   def check_invitation_code(%InviteCode{} = _code) do
     {:ok, nil}
   end
 
-  @impl true
+  # @impl true
   def append_invite(%User{} = _host, %User{} = _guest) do
     %Invite{}
   end
 
-  @impl true
+  # @impl true
   def verify_invite(%User{} = _host, %User{} = _guest) do
     {:ok, true}
   end
 
-  @impl true
+  # @impl true
   def get_host(%User{} = _user, _depth \\ 0) do
     {:ok, %{1 => [], 2 => []}}
   end
 
-  @impl true
+  # @impl true
   def get_guests(%User{} = _user, _depth \\ 0) do
     {:ok, %{1 => [], 2 => []}}
   end
 
-  @impl true
+  # @impl true
   def get_last_invite_code(%User{} = _user) do
     {:ok, %InviteCode{}}
   end
 
-  @impl true
+  # @impl true
   def get_invite_code(%User{} = _user) do
     {:ok, %InviteCode{}}
   end

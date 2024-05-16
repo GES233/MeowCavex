@@ -13,9 +13,9 @@ defmodule Member.User do
   * `join_at` 用户加入的时间，默认选择 `DateTime`
   """
 
-  import Status
+  # import Status
   alias Member.User.ContentInvalidError
-  alias Member.User.{Gender}
+  alias Member.User.{Gender, Status}
   alias Member.User.FieldInvalidError
 
   @type id_type :: integer()
@@ -345,7 +345,7 @@ defmodule Member.User.Gender do
     end
   end
 
-  @spec give(Member.User.Gender.t(), atom()) :: Member.User.Gender.t()
+  @spec give(Member.User.Gender.t(), atom()) :: {atom(), Member.User.Gender.t()}
   @doc """
   当性别为 `blank` 时给予性别。
   """

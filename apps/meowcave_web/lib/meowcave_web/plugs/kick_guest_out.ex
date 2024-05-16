@@ -25,14 +25,11 @@ defmodule MeowCaveWeb.KickGuestOut do
   def call(conn, _opts) do
     conn.assigns.current_user
     |> is_member?()
-    |> maybe_halt(conn)
+    |> halt_when_not_user(conn)
   end
 
   defp is_member?(_user), do: true
 
-  defp maybe_halt(true, conn), do: conn
-
-  defp maybe_halt(false, conn) do
-    conn
-  end
+  defp halt_when_not_user(true, conn), do: conn
+  # defp halt_when_not_user(false, conn), do: nil
 end
