@@ -20,8 +20,8 @@ defmodule MeowCaveWeb.Plugs.Locale do
   def call(conn, _opts) do
     conn
     # 有相关 Header/Cookie => 从对应的 Header/Cookie 中获取
+    # 无定位相关 Header 但是可以确定用户身份 => 从数据库中获取
     # 查无此人（无相关 Cookie/Header） => 从请求头中获取
-    # 无要求 => 从用户的信息中（数据库）获取
     # 选择默认
 
     # 如果没有的话，将经过查询的结果写入 Cookie
@@ -37,4 +37,7 @@ defmodule MeowCaveWeb.Plugs.Locale do
   # defp from_headers(%Plug.Conn{req_headers: headers} = _conn), do: headers
   # defp from_cookie(%Plug.Conn{} = _conn), do: nil
   # defp from_database(), do: nil
+
+  # defp has_locale_cookie?(_conn), do: false
+  # defp has_auth_cookie?(_conn), do: true
 end

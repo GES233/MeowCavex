@@ -53,12 +53,63 @@ defmodule MeowCaveWeb.Router do
     # ...
     ## 计划设计的路由
 
+    ## 页面
+    # 首页（经过认证的）
     # get "/" MeowPageController, :index
-    # get "/about" MeowPageController, :index
+    # 关于
+    # get "/about" MeowPageController, :about
+    # 使用方法
+    # get "/guide", MeowPageController, :overview
+    # get "/guide/:page", MeowPageController, :guide
+    # 使用许可
+    # get "/policy/:page", MeowPageController, :policy
+
+    ## 鉴权与用户
+    # 登录注册与注销
+    # get "/login", AccountController, :login_with_session
+    # get "/signup", AccountController, :signup
+    # get "/logout", AccountController, :logout_session
+    # 用户主页
     # get "/u/:user", UserController, :other
-    # get "/u/me", UserController, :me
-    # get "/t/:thread", ThreadController, :access
+    # get "/me", UserController, :me
+    # 邀请
+    # get "/invite", InvitationController, :show
+    # get "/invite/create", InvitationController, :create
+    # 关注
+    # get "/me/following", UserCollections, :following
+    # get "/me/followers", UserCollections, :followers
+    # get "/u/:user/following", UserCollections, :following
+    # get "/u/:user/followers", UserCollections, :followers
+
+    ## 内容
+    # 圈子
+    # get "/t/:topic", TopicController, :access
+    # get "/t/create", TopicController, :create
+    # get "/t/:topic/edit", TopicController, :edit
+    # 帖子
     # get "/p/:post", PostController, :access
+    # get "/p/create", PostController, :create
+    # get "/p/:post/idx/:index", PostController, :start_from
+    # 另一种格式是 "/p/:post?idx=:idx?range=:range / until=:until"
+    # 动态
+    # get "/f/create", FeedController, :create
+    # get "/f/:feed", FeedController, :access
+    # 收藏夹
+    # get "/c/:collect", ColleactionController, :access
+    # get "/c/new", ColleactionController, :create
+    # 评论
+    # TODO: 等到其它系统设计完成
+
+    ## MeowCave 的特色功能
+    # 冷冻
+    # get "/me/freeze", AccountController, :freeze
+    # 批量导出
+    # get "/me/export", ExportController, :user
+    # get "/p/:post/export", ExportController, :post
+    # get "/f/:feed/export", ExportController, :feed
+    # get "/c/:collect/export", ExportController, :collections
+    # 岁月史书
+    # get "/l/:event", RocorderController, :show
   end
 
   # Other scopes may use custom stacks.

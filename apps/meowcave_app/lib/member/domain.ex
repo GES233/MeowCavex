@@ -26,10 +26,9 @@ defmodule Member.User do
           nickname: String.t(),
           gender: Gender.t(),
           status: Status.t(),
-          # Use value when DTO.
-          # timezone: charlist(),
           info: String.t(),
           join_at: DateTime.t()
+          # locale: Member.User.Locale.t()
         }
   defstruct [
     :id,
@@ -37,9 +36,9 @@ defmodule Member.User do
     :nickname,
     :gender,
     :status,
-    # :timezone,
     :info,
     :join_at
+    # :locale
   ]
 
   @spec update!(Member.User.t(), atom(), any()) :: Member.User.t()
@@ -74,6 +73,7 @@ defmodule Member.User do
     case field do
       :gender -> {:ok, Map.replace(user, :gender, content)}
       :status -> {:ok, Map.replace(user, :status, content)}
+      # :locale -> {:ok, Map.replace(user, :locale, content)}
       _ -> {:error, :field_invalid}
     end
   end
@@ -504,7 +504,7 @@ defmodule Member.User.Repo do
   #           :: {:ok, %{atom() => non_neg_integer()}} | {:error, any()}
 end
 
-defmodule Member.Invite do
+defmodule Member.InviteRelation do
   @moduledoc """
   关于成员间的邀请关系，其将在很多场合被使用（
   例如邀请注册、惩罚的连坐、无法使用邮件的情况下的密码验证）。
@@ -527,6 +527,9 @@ defmodule Member.Invite do
 
   def invited?(%__MODULE__{} = invite),
     do: not is_nil(invite.guest_id)
+
+  def guest(%__MODULE__{} = invite),
+    do: invite.guest_id
 end
 
 defmodule Member.InviteCode do
@@ -534,6 +537,7 @@ defmodule Member.InviteCode do
   @type t :: %__MODULE__{
           code: code(),
           status: Member.InviteCode.Status.t(),
+          valid_period: Time.t(),
           create_at: DateTime.t()
         }
   defstruct [:code, :status, :valid_period, :create_at]
@@ -543,6 +547,8 @@ defmodule Member.InviteCode.Status do
   use Status, [:normal, :expire, :used, none: :default]
 
   ## Inspect.
+  def valid_status(), do: [:normal, :expire, :used]
+
   @spec enable?(Member.InviteCode.Status.t()) :: boolean()
   def enable?(status), do: under(status, :normal)
 end
@@ -567,7 +573,7 @@ defmodule Member.Invite.Repo do
 
   在更新人物外别忘了更新邀请码的状态。
   """
-  @callback append_invite(Member.User.t(), Member.User.t()) :: Member.Invite.t()
+  @callback append_invite(Member.User.t(), Member.User.t()) :: Member.InviteRelation.t()
 
   @doc """
   确认某两个人之间是否存在邀请关系。
