@@ -5,6 +5,8 @@ config :meowcave_app, :default_ports,
   user_repo: MeowCave.Member,
   password_hash: MeowCave.Member.User.PassHash
 
+## TODO: locale setting.
+
 ## TODO: set enable to use email.
 
 ## TODO: set strategies to kick guests out.
