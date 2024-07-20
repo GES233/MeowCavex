@@ -8,6 +8,12 @@ defmodule MeowCave.Member do
   @behaviour Member.User.Repo
   # 我很高兴一个模块可以继承多个行为
 
+  @impl true
+  def get_all() do
+    Repo.all(UserRepo)
+    |> Enum.map(&UserRepo.to_user/1)
+  end
+
   # TODO: refrac with Ecto.Changeset.traverse_errors/2
 
   @impl true

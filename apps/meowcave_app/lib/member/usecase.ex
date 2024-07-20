@@ -2,6 +2,22 @@ defmodule Member.Usecase do
   # TODO: integrate all usecases.
 end
 
+defmodule Member.Usecase.ListAllUsers do
+  @default_repo Application.compile_env(:meowcave_app, [:default_ports, :user_repo], nil)
+
+  def parse_opts(opts) do
+    {repo, _opts} = Keyword.pop(opts, :repo, @default_repo)
+
+    %{repo: repo}
+  end
+
+  def call(opts \\ []) do
+    %{repo: repo} = parse_opts(opts)
+
+    repo.get_all()
+  end
+end
+
 defmodule Member.Usecase.Register do
   @moduledoc false
 

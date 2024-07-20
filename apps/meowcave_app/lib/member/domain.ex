@@ -499,6 +499,11 @@ defmodule Member.User.Repo do
   """
   @callback get_user_by_id(pos_integer()) :: Member.User.t() | nil
 
+  @doc """
+  获取当前存在的所有用户。
+  """
+  @callback get_all() :: [Member.User.t()]
+
   # TODO:
   # @callback get_user_numbers()
   #           :: {:ok, %{atom() => non_neg_integer()}} | {:error, any()}
