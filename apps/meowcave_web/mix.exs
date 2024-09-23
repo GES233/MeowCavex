@@ -47,7 +47,7 @@ defmodule MeowCaveWeb.MixProject do
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
-      {:gettext, "~> 0.20"},
+      {:gettext, "~> 0.26"},
       {:meowcave, in_umbrella: true},
       # {:meowcave_app, in_umbrella: true},
       {:jason, "~> 1.2"},
