@@ -14,7 +14,7 @@ defmodule MeowCaveWeb.KickGuestOut do
   @behaviour Plug
   # import Plug.Conn
   # alias Phoenix.Controller
-  # import MeowCaveWeb.Gettext
+  # use Gettext, backend: MeowCaveWeb.Gettext
 
   @impl true
   def init(opts), do: opts

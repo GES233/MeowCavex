@@ -17,7 +17,7 @@ defmodule MeowCaveWeb.CoreComponents do
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
-  import MeowCaveWeb.Gettext
+  use Gettext, backend: MeowCaveWeb.Gettext
 
   @doc """
   Renders a modal.
@@ -78,7 +78,7 @@ defmodule MeowCaveWeb.CoreComponents do
                   <.icon name="hero-x-mark-solid" class="h-5 w-5" />
                 </button>
               </div>
-              
+
               <div id={"#{@id}-content"}>
                 <%= render_slot(@inner_block) %>
               </div>
@@ -126,9 +126,9 @@ defmodule MeowCaveWeb.CoreComponents do
         <.icon :if={@kind == :info} name="hero-information-circle-mini" class="h-4 w-4" />
         <.icon :if={@kind == :error} name="hero-exclamation-circle-mini" class="h-4 w-4" /> <%= @title %>
       </p>
-      
+
       <p class="mt-2 text-sm leading-5"><%= msg %></p>
-      
+
       <button type="button" class="group absolute top-1 right-1 p-2" aria-label={gettext("close")}>
         <.icon name="hero-x-mark-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
       </button>
@@ -162,7 +162,7 @@ defmodule MeowCaveWeb.CoreComponents do
       >
         Attempting to reconnect <.icon name="hero-arrow-path" class="ml-1 h-3 w-3 animate-spin" />
       </.flash>
-      
+
       <.flash
         id="server-error"
         kind={:error}
@@ -323,7 +323,7 @@ defmodule MeowCaveWeb.CoreComponents do
           {@rest}
         /> <%= @label %>
       </label>
-      
+
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
@@ -333,7 +333,7 @@ defmodule MeowCaveWeb.CoreComponents do
     ~H"""
     <div phx-feedback-for={@name}>
       <.label for={@id}><%= @label %></.label>
-      
+
       <select
         id={@id}
         name={@name}
@@ -344,7 +344,7 @@ defmodule MeowCaveWeb.CoreComponents do
         <option :if={@prompt} value=""><%= @prompt %></option>
          <%= Phoenix.HTML.Form.options_for_select(@options, @value) %>
       </select>
-      
+
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
     """
@@ -375,7 +375,7 @@ defmodule MeowCaveWeb.CoreComponents do
     ~H"""
     <div phx-feedback-for={@name}>
       <.label for={@id}><%= @label %></.label>
-      
+
       <input
         type={@type}
         name={@name}
@@ -439,12 +439,12 @@ defmodule MeowCaveWeb.CoreComponents do
         <h1 class="text-lg font-semibold leading-8 text-zinc-800">
           <%= render_slot(@inner_block) %>
         </h1>
-        
+
         <p :if={@subtitle != []} class="mt-2 text-sm leading-6 text-zinc-600">
           <%= render_slot(@subtitle) %>
         </p>
       </div>
-      
+
       <div class="flex-none"><%= render_slot(@actions) %></div>
     </header>
     """
@@ -487,13 +487,13 @@ defmodule MeowCaveWeb.CoreComponents do
         <thead class="text-sm text-left leading-6 text-zinc-500">
           <tr>
             <th :for={col <- @col} class="p-0 pb-4 pr-6 font-normal"><%= col[:label] %></th>
-            
+
             <th :if={@action != []} class="relative p-0 pb-4">
               <span class="sr-only"><%= gettext("Actions") %></span>
             </th>
           </tr>
         </thead>
-        
+
         <tbody
           id={@id}
           phx-update={match?(%Phoenix.LiveView.LiveStream{}, @rows) && "stream"}
@@ -512,7 +512,7 @@ defmodule MeowCaveWeb.CoreComponents do
                 </span>
               </div>
             </td>
-            
+
             <td :if={@action != []} class="relative w-14 p-0">
               <div class="relative whitespace-nowrap py-4 text-right text-sm font-medium">
                 <span class="absolute -inset-y-px -right-4 left-0 group-hover:bg-zinc-50 sm:rounded-r-xl" />
@@ -551,7 +551,7 @@ defmodule MeowCaveWeb.CoreComponents do
       <dl class="-my-4 divide-y divide-zinc-100">
         <div :for={item <- @item} class="flex gap-4 py-4 text-sm leading-6 sm:gap-8">
           <dt class="w-1/4 flex-none text-zinc-500"><%= item.title %></dt>
-          
+
           <dd class="text-zinc-700"><%= render_slot(item) %></dd>
         </div>
       </dl>

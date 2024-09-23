@@ -5,7 +5,7 @@ defmodule MeowCaveWeb.Gettext do
   By using [Gettext](https://hexdocs.pm/gettext),
   your module gains a set of macros for translations, for example:
 
-      import MeowCaveWeb.Gettext
+      use Gettext, backend: MeowCaveWeb.Gettext
 
       # Simple translation
       gettext("Here is the string to translate")
@@ -20,5 +20,5 @@ defmodule MeowCaveWeb.Gettext do
 
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
-  use Gettext, otp_app: :meowcave_web
+  use Gettext.Backend, otp_app: :meowcave_web
 end

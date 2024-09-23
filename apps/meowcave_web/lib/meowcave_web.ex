@@ -43,7 +43,7 @@ defmodule MeowCaveWeb do
         layouts: [html: MeowCaveWeb.Layouts]
 
       import Plug.Conn
-      import MeowCaveWeb.Gettext
+      use Gettext, backend: MeowCaveWeb.Gettext
 
       unquote(verified_routes())
     end
@@ -87,7 +87,7 @@ defmodule MeowCaveWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import MeowCaveWeb.CoreComponents
-      import MeowCaveWeb.Gettext
+      use Gettext, backend: MeowCaveWeb.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
