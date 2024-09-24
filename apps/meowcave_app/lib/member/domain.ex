@@ -427,11 +427,11 @@ defmodule Member.User.Authentication do
   # authentication fields
 
   @type t :: %__MODULE__{
-          id: Member.User.id_type(),
+          id: Member.User.id_type() | nil,
           nickname: String.t(),
           email: String.t(),
           password: String.t(),
-          hashed_password: charlist()
+          hashed_password: charlist() | nil
         }
   @enforce_keys [:nickname, :email]
   defstruct [:id, :nickname, :email, :password, :hashed_password]

@@ -8,6 +8,15 @@ defmodule MeowCave.Member.UserRepo do
 
   alias Member.User
 
+  # https://hexdocs.pm/ecto/Ecto.Schema.html#module-working-with-typespecs
+  @type t :: %__MODULE__{
+    username: String.t(),
+    nickname: String.t(),
+    status: Member.User.Status.t(),
+    gender: Member.User.Gender.t(),
+    info: String.t()
+  }
+
   schema "users" do
     # from Member.User
     field :username, :string

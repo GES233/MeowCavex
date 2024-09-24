@@ -23,7 +23,7 @@ defmodule Member.Service.Register do
   @spec create_auth(maybe_improper_list() | map()) :: Member.User.Authentication.t()
   def create_auth(fields), do: create_auth(fields[:nickname], fields[:email], fields[:password])
 
-  @spec create_auth(charlist() | nil, String.t(), String.t()) ::
+  @spec create_auth(charlist(), String.t(), String.t()) ::
           Member.User.Authentication.t()
   def create_auth(nickname, email, password) do
     %MemberAuth{id: nil, nickname: nickname, email: email, password: password}
@@ -36,8 +36,8 @@ defmodule Member.Service.Register do
   @spec create_blank_user(Member.User.Authentication.t(), Member.User.Locale.t()) ::
           Member.User.t()
   def create_blank_user(
-        %MemberAuth{nickname: nickname} = _userauth,
-        %Locale{timezone: _timezone, lang: _lang} = _locale,
+        %MemberAuth{nickname: nickname},
+        %Locale{timezone: _timezone, lang: _lang},
         current \\ DateTime.utc_now(:second)
       ) do
     # 时区信息应该来自 DTO 。
